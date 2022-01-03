@@ -1,0 +1,6 @@
+Change Component Designator: OldDesignator=Cellular NewDesignator=Cellular1
+Change Component Designator: OldDesignator=USB Battery Charger NewDesignator=USB Battery Charge
+Added Member To Class: ClassName=Gateway Schematic Member=Component R8 MCR006YRTF82R0
+Added Member To Class: ClassName=Gateway Schematic Member=Component R10 RC0201FR-0711KL
+Added Member To Class: ClassName=Gateway Schematic Member=Component Regulator L78S05CV
+Added Room: Name=Gateway Schematic

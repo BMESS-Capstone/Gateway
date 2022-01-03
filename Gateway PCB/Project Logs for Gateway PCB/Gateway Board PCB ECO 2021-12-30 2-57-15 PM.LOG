@@ -1,0 +1,98 @@
+Change Component Designator: OldDesignator= D1 NewDesignator=D1
+Change Component Designator: OldDesignator=R8 NewDesignator=R10
+Change Component Designator: OldDesignator=R10 NewDesignator=R12
+Change Component Designator: OldDesignator= R11 NewDesignator=R11
+Added Component: Designator=D8(LED_SML-D12D1WT86)
+Add component (AddParameter): Name = "Availability"; Value = "Good"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Check_prices"; Value = "https://www.snapeda.com/parts/SML-D12D1WT86/Rohm/view-part/681299/?ref=eda"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "MF"; Value = "Rohm"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "MP"; Value = "SML-D12D1WT86"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Package"; Value = "0603 Rohm"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Price"; Value = "None"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Purchase-URL"; Value = "https://pricing.snapeda.com/search/part/SML-D12D1WT86/?ref=eda"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "SnapEDA_Link"; Value = "https://www.snapeda.com/parts/SML-D12D1WT86/Rohm/view-part/681299/?ref=snap"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Value"; Value = ""; VariantName = "[No Variations]"
+Added Component: Designator=N-Channel(SOIC127P600X175-8N)
+Add component (AddParameter): Name = "Availability"; Value = "Warning"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Check_prices"; Value = "https://www.snapeda.com/parts/FDS2734/ON%20Semiconductor/view-part/1822193/?ref=eda"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "MF"; Value = "ON Semiconductor"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "MP"; Value = "FDS2734"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Package"; Value = "SO-8 ON Semiconductor"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Price"; Value = "None"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Purchase-URL"; Value = "https://pricing.snapeda.com/search/part/FDS2734/?ref=eda"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "SnapEDA_Link"; Value = "https://www.snapeda.com/parts/FDS2734/ON%20Semiconductor/view-part/1822193/?ref=snap"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Value"; Value = ""; VariantName = "[No Variations]"
+Added Component: Designator=P-Channel(SOIC127P600X175-8N)
+Add component (AddParameter): Name = "Availability"; Value = "Warning"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Check_prices"; Value = "https://www.snapeda.com/parts/FDS6575/ON%20Semiconductor/view-part/2754514/?ref=eda"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "MF"; Value = "ON Semiconductor"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "MP"; Value = "FDS6575"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Package"; Value = "SO-8 ON Semiconductor"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Price"; Value = "None"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Purchase-URL"; Value = "https://pricing.snapeda.com/search/part/FDS6575/?ref=eda"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "SnapEDA_Link"; Value = "https://www.snapeda.com/parts/FDS6575/ON%20Semiconductor/view-part/2754514/?ref=snap"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Value"; Value = ""; VariantName = "[No Variations]"
+Added Component: Designator=R8(RESC0603X26N)
+Add component (AddParameter): Name = "Availability"; Value = "Unavailable"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "MF"; Value = ""; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "MP"; Value = "MCR006YRTF82R0"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Package"; Value = "None"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Price"; Value = "None"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Value"; Value = ""; VariantName = "[No Variations]"
+Added Component: Designator=R13(RESC0603X26N)
+Add component (AddParameter): Name = "Availability"; Value = "Unavailable"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "MF"; Value = ""; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "MP"; Value = "RC0201FR-0711KL"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Package"; Value = "None"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Price"; Value = "None"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Value"; Value = ""; VariantName = "[No Variations]"
+Added Component: Designator=R14(RESC0603X26N)
+Add component (AddParameter): Name = "Availability"; Value = "Unavailable"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "MF"; Value = ""; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "MP"; Value = "RC0201FR-0711KL"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Package"; Value = "None"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Price"; Value = "None"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Value"; Value = ""; VariantName = "[No Variations]"
+Added Component: Designator=USB Battery Charge(GCT_USB1130-15-A_REVA)
+Add component (AddParameter): Name = "Availability"; Value = "Unavailable"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Check_prices"; Value = "https://www.snapeda.com/parts/USB1130-15-A/Global%20Connector%20Technology/view-part/5160678/?ref=eda"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "MF"; Value = "Global Connector Technology"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "MP"; Value = "USB1130-15-A"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Package"; Value = "None"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Price"; Value = "None"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "SnapEDA_Link"; Value = "https://www.snapeda.com/parts/USB1130-15-A/Global%20Connector%20Technology/view-part/5160678/?ref=snap"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Value"; Value = ""; VariantName = "[No Variations]"
+Added Pin To Net: NetName=GND Pin=N-Channel-1
+Added Pin To Net: NetName=GND Pin=N-Channel-2
+Added Pin To Net: NetName=GND Pin=N-Channel-3
+Added Pin To Net: NetName=Outlet LED Pin=N-Channel-4
+Added Pin To Net: NetName=5V Pin=P-Channel-1
+Added Pin To Net: NetName=5V Pin=P-Channel-2
+Added Pin To Net: NetName=5V Pin=P-Channel-3
+Added Pin To Net: NetName=GND Pin=R8-1
+Added Pin To Net: NetName=5V Pin=R13-2
+Added Pin To Net: NetName=GND Pin=R14-1
+Added Pin To Net: NetName=GND Pin=USB Battery Charge-4
+Added Pin To Net: NetName=GND Pin=USB Battery Charge-S1
+Added Pin To Net: NetName=GND Pin=USB Battery Charge-S2
+Change Net Name : Old Net Name=Net D1_C New Net Name=NetD1_C
+Added Pin To Net: NetName=Charging LED Pin=D8-A
+Added Pin To Net: NetName=Charging LED Pin=P-Channel-5
+Added Pin To Net: NetName=Charging LED Pin=P-Channel-6
+Added Pin To Net: NetName=Charging LED Pin=P-Channel-7
+Added Pin To Net: NetName=Charging LED Pin=P-Channel-8
+Added Pin To Net: NetName=Charging LED Pin=R14-2
+Added Pin To Net: NetName=Charging LED Pin=USB Battery Charge-1
+Added Net: Name=Charging LED
+Added Pin To Net: NetName=NetD8_C Pin=D8-C
+Added Pin To Net: NetName=NetD8_C Pin=R8-2
+Added Net: Name=NetD8_C
+Added Pin To Net: NetName=NetN-Channel_5 Pin=N-Channel-5
+Added Pin To Net: NetName=NetN-Channel_5 Pin=N-Channel-6
+Added Pin To Net: NetName=NetN-Channel_5 Pin=N-Channel-7
+Added Pin To Net: NetName=NetN-Channel_5 Pin=N-Channel-8
+Added Pin To Net: NetName=NetN-Channel_5 Pin=P-Channel-4
+Added Pin To Net: NetName=NetN-Channel_5 Pin=R13-1
+Added Net: Name=NetN-Channel_5
+Added Class: Name=Gateway Schematic
+Added Room: Name=Gateway Schematic
