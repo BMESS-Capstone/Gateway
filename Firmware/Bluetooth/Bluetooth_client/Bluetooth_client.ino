@@ -55,8 +55,8 @@ bool connectToServer() {
     pClient -> connect(myDevice);  // if you pass BLEAdvertisedDevice instead of address, it will be recognized type of peer device address (public or private)
     Serial.println(" - Connected to server");
 
-    pClient -> getServices();
-    Serial.println(" - Testing");
+    // pClient -> getServices();
+    // Serial.println(" - Testing");
 
     // Obtain a reference to the service we are after in the remote BLE server.
     BLERemoteService* pRemoteService = pClient -> getService(serviceUUID);
