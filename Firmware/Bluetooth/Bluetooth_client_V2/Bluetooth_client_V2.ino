@@ -188,6 +188,7 @@ void loop() {
       connected = true;
     } else {
       Serial.println("We have failed to connect to the server; Restart your device to scan for nearby BLE server again.");
+    }
     doConnect = false;
   }
   //if new temperature readings are available, print in the OLED
