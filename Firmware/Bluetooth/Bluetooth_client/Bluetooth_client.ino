@@ -1,17 +1,17 @@
 /**
- * A BLE client example that is rich in capabilities.
- * There is a lot new capabilities implemented.
- * author unknown
- * updated by chegewara
+ * BLE Client for the pIRfusiX sensor system
  */
 
+// Note: Library available as part of the ESP32 package (new feature)
 #include "BLEDevice.h"
 //#include "BLEScan.h"
 
 // The remote service we wish to connect to.
-static BLEUUID serviceUUID("4fafc201-1fb5-459e-8fcc-c5c9c331914b");
-// The characteristic of the remote service we are interested in.
-static BLEUUID    charUUID("beb5483e-36e1-4688-b7f5-ea07361b26a8");
+static BLEUUID serviceUUID("175f0000-73f7-11ec-90d6-0242ac120003");
+// The characteristics of the remote service we are interested in.
+static BLEUUID sensorCharUUID("175f0001-73f7-11ec-90d6-0242ac120003");
+static BLEUUID batteryCharUUID("175f0002-73f7-11ec-90d6-0242ac120003");
+static BLEUUID connectCharUUID("175f50003-73f7-11ec-90d6-0242ac120003");
 
 static boolean doConnect = false;
 static boolean connected = false;
@@ -46,7 +46,7 @@ bool connectToServer() {
     Serial.print("Forming a connection to ");
     Serial.println(myDevice -> getAddress().toString().c_str());
     
-    BLEClient*  pClient  = BLEDevice::createClient();
+    BLEClient *pClient = BLEDevice::createClient();
     Serial.println(" - Created client");
 
     pClient -> setClientCallbacks(new MyClientCallback());
@@ -54,6 +54,9 @@ bool connectToServer() {
     // Connect to the remove BLE Server.
     pClient -> connect(myDevice);  // if you pass BLEAdvertisedDevice instead of address, it will be recognized type of peer device address (public or private)
     Serial.println(" - Connected to server");
+
+    pClient -> getServices();
+    Serial.println(" - Testing");
 
     // Obtain a reference to the service we are after in the remote BLE server.
     BLERemoteService* pRemoteService = pClient -> getService(serviceUUID);
@@ -67,10 +70,10 @@ bool connectToServer() {
 
 
     // Obtain a reference to the characteristic in the service of the remote BLE server.
-    pRemoteCharacteristic = pRemoteService -> getCharacteristic(charUUID);
+    pRemoteCharacteristic = pRemoteService -> getCharacteristic(connectCharUUID);
     if (pRemoteCharacteristic == nullptr) {
       Serial.print("Failed to find our characteristic UUID: ");
-      Serial.println(charUUID.toString().c_str());
+      Serial.println(connectCharUUID.toString().c_str());
       pClient -> disconnect();
       return false;
     }
@@ -114,6 +117,7 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
 
 void setup() {
   Serial.begin(115200);
+  while(Serial.available() == 0) {}
   Serial.println("Starting Arduino BLE Client application...");
   BLEDevice::init("");
 
@@ -152,7 +156,7 @@ void loop() {
     
     // Set the characteristic's value to be the array of bytes that is actually a string.
     pRemoteCharacteristic -> writeValue(newValue.c_str(), newValue.length());
-  }else if(doScan){
+  } else if(doScan){
     BLEDevice::getScan() -> start(0);  // this is just eample to start scan after disconnect, most likely there is better way to do it in arduino
   }
   
