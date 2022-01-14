@@ -10,42 +10,41 @@
 //*****Shared with NANO 33 TODO: move to a common refererred .h file***
 #define BUFFER_SIZE 40
 
-#define UNSPECIFIED_LOCATION 0
-#define LEFT_ARM 1
-#define RIGHT_ARM 2
-#define LEFT_LEG 3
-#define RIGHT_LEG 4
+#define TOTAL_POSSIBLE_LOCATIONS 4
+#define LEFT_ARM 0
+#define RIGHT_ARM 1
+#define LEFT_LEG 2
+#define RIGHT_LEG 3
 
-#define CONNECTION_UUID "6164e19e-7565-11ec-90d6-0242ac120003"
-#define UNSPECIFIED_UUID "6164e5d6-7565-11ec-90d6-0242ac120003"
-#define LEFT_ARM_UUID "6164e702-7565-11ec-90d6-0242ac120003"
-#define RIGHT_ARM_UUID "6164e810-7565-11ec-90d6-0242ac120003"
-#define LEFT_LEG_UUID "6164e928-7565-11ec-90d6-0242ac120003"
-#define RIGHT_LEG_UUID "6164ea18-7565-11ec-90d6-0242ac120003"
+#define CONNECT_UUID "6164e702-7565-11ec-90d6-0242ac120003"
+
+#define SENSOR_CHAR_UUID "fec40b26-757a-11ec-90d6-0242ac120003"
+#define BATTERY_CHAR_UUID "fec40dc4-757a-11ec-90d6-0242ac120003"
 //********************************************************************
 
 #define ONBOARD_LED 2
 
 /* UUID's of the service, characteristic that we want to read and/or write */
 // BLE Services
-static char serviceUUID[] = CONNECTION_UUID;
+static char serviceUUID[] = CONNECT_UUID;
 
 // Connection Characteristic
-static BLEUUID characteristicUUID("cc58110b-d173-4a9f-b0d5-1b0dd006c357");
+static char sensorCharacteristicUUID[] = SENSOR_CHAR_UUID;
+static char batteryCharacteristicUUID[] = BATTERY_CHAR_UUID;
 
 //Flags stating if should begin connecting and if the connection is up
 static boolean doConnect = false;
 static boolean connected = false;
-static boolean connectionComplete = false;
 
 //Advertised device of the peripheral device. Address will be found during scanning...
-static BLEAdvertisedDevice *myDevice;
+static BLEAdvertisedDevice *myDevice[TOTAL_POSSIBLE_LOCATIONS];
 
 //Characteristic that we want to read
-static BLERemoteCharacteristic *pRemoteCharacteristic;
+static BLERemoteCharacteristic *pRemoteSensorCharacteristic;
+static BLERemoteCharacteristic *pRemoteBatteryCharacteristic;
 
 //Variable to store characteristic value
-int connectChar;
+float value;
 
 static void notifyCallback(
     BLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify)
@@ -101,7 +100,7 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
       /*******************************************************************
               myDevice = new BLEAdvertisedDevice(advertisedDevice);
         *******************************************************************/
-      myDevice = advertisedDevice; /** Just save the reference now, no need to copy the object */
+      myDevice[0] = advertisedDevice; /** Just save the reference now, no need to copy the object */
       doConnect = true;
 
     } // Found our server
@@ -112,14 +111,14 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
 bool connectToServer()
 {
   Serial.print("Forming a connection to ");
-  Serial.println(myDevice->getAddress().toString().c_str());
+  Serial.println(myDevice[0]->getAddress().toString().c_str());
 
   BLEClient *pClient = BLEDevice::createClient();
   pClient->setClientCallbacks(new MyClientCallback());
   Serial.println(" - Created client");
 
   // Connect to the remove BLE Server.
-  pClient->connect(myDevice);
+  pClient->connect(myDevice[0]);
   Serial.println(" - Connected to server");
 
   // Obtain a reference to the service we are after in the remote BLE server.
@@ -133,53 +132,53 @@ bool connectToServer()
   Serial.println(" - Found our service");
 
   // Obtain a reference to the characteristics in the service of the remote BLE server.
-  pRemoteCharacteristic = pRemoteService->getCharacteristic(characteristicUUID);
-  if (pRemoteCharacteristic == nullptr)
+  pRemoteSensorCharacteristic = pRemoteService->getCharacteristic(sensorCharacteristicUUID);
+  if (pRemoteSensorCharacteristic == nullptr)
   {
-    Serial.println("Failed to find our characteristic UUID");
+    Serial.println("Failed to find our sensor characteristic UUID");
     return false;
   }
-  Serial.println(" - Found our characteristic");
-
-  // Read the value of the characteristic.
-  if (pRemoteCharacteristic->canRead())
+  pRemoteBatteryCharacteristic = pRemoteService->getCharacteristic(batteryCharacteristicUUID);
+  if (pRemoteBatteryCharacteristic == nullptr)
   {
-    if(!connectionComplete) {
+    Serial.println("Failed to find our battery characteristic UUID");
+    return false;
+  }
+  Serial.println(" - Found our characteristics");
+
+  // Read the value of the sensor characteristic.
+  if (pRemoteSensorCharacteristic->canRead())
+  {
     // Note timestamp from documentation: readValue(time_t *timestamp = nullptr);
-    int value = atoi(pRemoteCharacteristic->readValue().c_str());
+    value = atof(pRemoteSensorCharacteristic->readValue().c_str());
     Serial.print("The characteristic value was: ");
-    connectChar = value;
-    Serial.println(connectChar);
-    }
+    Serial.println(value);
   }
 
-  // Set the characteristic to be writable.
-  if (pRemoteCharacteristic->canWrite())
+  // Read the value of the battery characteristic.
+  if (pRemoteBatteryCharacteristic->canRead())
   {
-    Serial.println("Characteristic is writtable");
-    connected = true;
+    // Note timestamp from documentation: readValue(time_t *timestamp = nullptr);
+    value = atof(pRemoteBatteryCharacteristic->readValue().c_str());
+    Serial.print("The characteristic value was: ");
+    Serial.println(value);
   }
 
   //Assign callback functions for the Characteristics
-  if (pRemoteCharacteristic->canNotify())
+  if (pRemoteSensorCharacteristic->canNotify() || pRemoteBatteryCharacteristic->canNotify())
   {
-    Serial.println("Characteristic can notify");
-    if (!pRemoteCharacteristic->subscribe(true, notifyCallback))
+    Serial.println("Characteristic(s) can notify");
+    if (!pRemoteSensorCharacteristic->subscribe(true, notifyCallback))
     {
       /** Disconnect if subscribe failed */
-      Serial.println("Characteristic subscription failed");
+      Serial.println("Sensor characteristic subscription failed");
       pClient->disconnect();
       return false;
     }
-  }
-  else if (pRemoteCharacteristic->canIndicate())
-  {
-    Serial.println("Characteristic can indicate");
-    /** Send false as first argument to subscribe to indications instead of notifications */
-    if (!pRemoteCharacteristic->subscribe(false, notifyCallback))
+    if (!pRemoteBatteryCharacteristic->subscribe(true, notifyCallback))
     {
       /** Disconnect if subscribe failed */
-      Serial.println("Characteristic subscription failed");
+      Serial.println("Battery characteristic subscription failed");
       pClient->disconnect();
       return false;
     }
@@ -203,7 +202,7 @@ void setup()
   pBLEScan->setActiveScan(true);
   pBLEScan->setInterval(1349);
   pBLEScan->setWindow(449);
-  pBLEScan->start(15, false);
+  pBLEScan->start(0);
 
   pinMode(ONBOARD_LED, OUTPUT);
 }
@@ -231,23 +230,6 @@ void loop()
   {
     // Set the characteristic's value to be the array of bytes that is actually a string.
     /*** Note: write / read value now returns true if successful, false otherwise - try again or disconnect ***/
-    // switch(connectChar) {
-    //   case UNSPECIFIED_LOCATION:
-    //     pRemoteCharacteristic->writeValue(UNSPECIFIED_UUID, sizeof(UNSPECIFIED_UUID));
-    //     break;
-    //   case LEFT_ARM:
-    //     pRemoteCharacteristic->writeValue(LEFT_ARM_UUID, sizeof(LEFT_ARM_UUID));
-    //     break;
-    //   case RIGHT_ARM:
-    //     pRemoteCharacteristic->writeValue(RIGHT_ARM_UUID, sizeof(RIGHT_ARM_UUID));
-    //     break;
-    //   case LEFT_LEG:
-    //     pRemoteCharacteristic->writeValue(LEFT_LEG_UUID, sizeof(LEFT_LEG_UUID));
-    //     break;
-    //   case RIGHT_LEG:
-    //     pRemoteCharacteristic->writeValue(RIGHT_LEG_UUID, sizeof(RIGHT_LEG_UUID));
-    //     break;
-    // }    
   }
   else
   {

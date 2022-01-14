@@ -16,12 +16,15 @@
 #define LEFT_LEG 3
 #define RIGHT_LEG 4
 
-#define CONNECTION_UUID "6164e19e-7565-11ec-90d6-0242ac120003"
-#define UNSPECIFIED_UUID "6164e5d6-7565-11ec-90d6-0242ac120003"
 #define LEFT_ARM_UUID "6164e702-7565-11ec-90d6-0242ac120003"
 #define RIGHT_ARM_UUID "6164e810-7565-11ec-90d6-0242ac120003"
 #define LEFT_LEG_UUID "6164e928-7565-11ec-90d6-0242ac120003"
 #define RIGHT_LEG_UUID "6164ea18-7565-11ec-90d6-0242ac120003"
+
+#define LOCATION_UUID_ARRAY {LEFT_ARM_UUID, RIGHT_ARM_UUID, LEFT_LEG_UUID, RIGHT_LEG_UUID}
+
+#define SENSOR_CHAR_UUID "fec40b26-757a-11ec-90d6-0242ac120003"
+#define BATTERY_CHAR_UUID "fec40dc4-757a-11ec-90d6-0242ac120003"
 //********************************************************************
 
 #define ONBOARD_LED 2
@@ -36,7 +39,6 @@ static BLEUUID characteristicUUID("cc58110b-d173-4a9f-b0d5-1b0dd006c357");
 //Flags stating if should begin connecting and if the connection is up
 static boolean doConnect = false;
 static boolean connected = false;
-static boolean connectionComplete = false;
 
 //Advertised device of the peripheral device. Address will be found during scanning...
 static BLEAdvertisedDevice *myDevice;
@@ -45,7 +47,7 @@ static BLEAdvertisedDevice *myDevice;
 static BLERemoteCharacteristic *pRemoteCharacteristic;
 
 //Variable to store characteristic value
-int connectChar;
+float value;
 
 static void notifyCallback(
     BLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify)
@@ -144,13 +146,10 @@ bool connectToServer()
   // Read the value of the characteristic.
   if (pRemoteCharacteristic->canRead())
   {
-    if(!connectionComplete) {
     // Note timestamp from documentation: readValue(time_t *timestamp = nullptr);
-    int value = atoi(pRemoteCharacteristic->readValue().c_str());
+    value = atof(pRemoteCharacteristic->readValue().c_str());
     Serial.print("The characteristic value was: ");
-    connectChar = value;
-    Serial.println(connectChar);
-    }
+    Serial.println(value);
   }
 
   // Set the characteristic to be writable.
@@ -203,7 +202,7 @@ void setup()
   pBLEScan->setActiveScan(true);
   pBLEScan->setInterval(1349);
   pBLEScan->setWindow(449);
-  pBLEScan->start(15, false);
+  pBLEScan->start(0);
 
   pinMode(ONBOARD_LED, OUTPUT);
 }
@@ -231,23 +230,8 @@ void loop()
   {
     // Set the characteristic's value to be the array of bytes that is actually a string.
     /*** Note: write / read value now returns true if successful, false otherwise - try again or disconnect ***/
-    // switch(connectChar) {
-    //   case UNSPECIFIED_LOCATION:
-    //     pRemoteCharacteristic->writeValue(UNSPECIFIED_UUID, sizeof(UNSPECIFIED_UUID));
-    //     break;
-    //   case LEFT_ARM:
-    //     pRemoteCharacteristic->writeValue(LEFT_ARM_UUID, sizeof(LEFT_ARM_UUID));
-    //     break;
-    //   case RIGHT_ARM:
-    //     pRemoteCharacteristic->writeValue(RIGHT_ARM_UUID, sizeof(RIGHT_ARM_UUID));
-    //     break;
-    //   case LEFT_LEG:
-    //     pRemoteCharacteristic->writeValue(LEFT_LEG_UUID, sizeof(LEFT_LEG_UUID));
-    //     break;
-    //   case RIGHT_LEG:
-    //     pRemoteCharacteristic->writeValue(RIGHT_LEG_UUID, sizeof(RIGHT_LEG_UUID));
-    //     break;
-    // }    
+    char uuid_locations_uuid[][37] = LOCATION_UUID_ARRAY;
+    pRemoteCharacteristic->writeValue(uuid_locations_uuid[connectChar], sizeof(uuid_locations_uuid[connectChar]));
   }
   else
   {
