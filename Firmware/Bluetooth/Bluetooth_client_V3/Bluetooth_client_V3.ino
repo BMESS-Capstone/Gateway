@@ -1,22 +1,24 @@
 /**
  BLE Client for the pIRfusiX sensor system Version 3
 
+ Uses 69% of program storage space & 8% of dynamic memory
+
  Author: Khaled Elmalawany
  */
 
 #include "BLEDevice.h"
 
-#define ONBOARD_LED  2
+#define ONBOARD_LED 2
 
 // BLE Server Name
 #define bleServerName "pIRfusiX sensor"
 
 /* UUID's of the service, characteristic that we want to read and/or write */
 // BLE Services
-static BLEUUID connectServiceUUID("175f0000-73f7-11ec-90d6-0242ac120003");
+static BLEUUID connectServiceUUID("7e161f79-2ce9-46d1-917a-8e20f6b1f675");
 
 // Connection Characteristic
-static BLEUUID connectCharacteristicUUID("175f50003-73f7-11ec-90d6-0242ac120003");
+static BLEUUID connectCharacteristicUUID("cc58110b-d173-4a9f-b0d5-1b0dd006c357");
 
 //Flags stating if should begin connecting and if the connection is up
 static boolean doConnect = false;
@@ -77,31 +79,31 @@ bool connectToServer(BLEAddress pAddress) {
   Serial.println(" - Connected to server");
  
   // Obtain a reference to the service we are after in the remote BLE server.
-  BLERemoteService* pRemoteService = pClient->getService(connectServiceUUID);
+  BLERemoteService *pRemoteService = pClient->getService(connectServiceUUID);
   if (pRemoteService == nullptr) {
     Serial.print("Failed to find our service UUID: ");
-    Serial.println(bmeServiceUUID.toString().c_str());
+    Serial.println(connectServiceUUID.toString().c_str());
     return (false);
   }
   Serial.println(" - Found our service");
  
   // Obtain a reference to the characteristics in the service of the remote BLE server.
   connectCharacteristic = pRemoteService->getCharacteristic(connectCharacteristicUUID);
-  if (connectCharacteristicUUID == nullptr) {
+  if (connectCharacteristic == nullptr) {
     Serial.print("Failed to find our characteristic UUID");
     return false;
   }
   Serial.println(" - Found our characteristic");
 
   // Read the value of the characteristic.
-  if(pRemoteCharacteristic -> canRead()) {
-    std::string value = pRemoteCharacteristic -> readValue();
+  if(connectCharacteristic -> canRead()) {
+    std::string value = connectCharacteristic -> readValue();
     Serial.print("The characteristic value was: ");
     Serial.println(value.c_str());
   }
  
   //Assign callback functions for the Characteristics
-  connectCharacteristic->registerForNotify(connectNotifyCallback);
+  connectCharacteristic->registerForNotify(notifyCallback);
   return true;
 }
 
@@ -109,6 +111,8 @@ void setup() {
   Serial.begin(115200);
 
   Serial.println("Starting Arduino BLE Client application...");
+  while(Serial.available() == 0) {}
+
   BLEDevice::init("");
 
   // Retrieve a Scanner and set the callback we want to use to be informed when we
@@ -127,7 +131,7 @@ void loop() {
   // BLE Server with which we wish to connect.  Now we connect to it.  Once we are 
   // connected we set the connected flag to be true.
   if (doConnect == true) {
-    if (connectToServer()) {
+    if (connectToServer(*pServerAddress)) {
       Serial.println("We are now connected to the BLE Server.");
     } else {
       Serial.println("We have failed to connect to the server; there is nothin more we will do.");
@@ -143,8 +147,6 @@ void loop() {
     
     // Set the characteristic's value to be the array of bytes that is actually a string.
     // pRemoteCharacteristic -> writeValue(newValue.c_str(), newValue.length());
-  } else if(doScan){
-    BLEDevice::getScan() -> start(0);  // this is just eample to start scan after disconnect, most likely there is better way to do it in arduino
   }
   
   delay(1000); // Delay a second between loops.
