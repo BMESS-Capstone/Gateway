@@ -28,6 +28,9 @@
 // BLE Services
 static char serviceUUID[] = CONNECT_UUID;
 
+// BLE Client
+static BLEClient *pClient;
+
 // Connection Characteristic
 static char sensorCharacteristicUUID[] = SENSOR_CHAR_UUID;
 static char batteryCharacteristicUUID[] = BATTERY_CHAR_UUID;
@@ -35,16 +38,21 @@ static char batteryCharacteristicUUID[] = BATTERY_CHAR_UUID;
 //Flags stating if should begin connecting and if the connection is up
 static boolean doConnect = false;
 static boolean connected = false;
+static boolean isConnectionComplete = false;
+static boolean moreThanOneSensor = false;
+static uint8_t connectionCounter = 0;
 
 //Advertised device of the peripheral device. Address will be found during scanning...
-static BLEAdvertisedDevice *myDevice[TOTAL_POSSIBLE_LOCATIONS];
+static BLEAdvertisedDevice *myDevice;
+static std::string myDevices[TOTAL_POSSIBLE_LOCATIONS];
 
 //Characteristic that we want to read
 static BLERemoteCharacteristic *pRemoteSensorCharacteristic;
 static BLERemoteCharacteristic *pRemoteBatteryCharacteristic;
 
-//Variable to store characteristic value
-float value;
+//Variable to store characteristics' value
+float sensorValue;
+int batteryValue;
 
 static void notifyCallback(
     BLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify)
@@ -62,6 +70,7 @@ class MyClientCallback : public BLEClientCallbacks
 {
   void onConnect(BLEClient *pclient)
   {
+    connected = true;
     digitalWrite(ONBOARD_LED, HIGH);
   }
 
@@ -89,36 +98,44 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
     // Serial.print("BLE Advertised Device found: ");
     // Serial.println(advertisedDevice->toString().c_str());
 
-    // We have found a device, let us now see if it contains the service we are looking for.
-    /********************************************************************************
+    std::string *address = std::find(std::begin(myDevices), std::end(myDevices), advertisedDevice->getAddress().toString());
+    if (address == std::end(myDevices))
+    {
+      // We have found a device, let us now see if it contains the service we are looking for.
+      /********************************************************************************
           if (advertisedDevice.haveServiceUUID() && advertisedDevice.isAdvertisingService(serviceUUID)) {
       ********************************************************************************/
-    if (advertisedDevice->haveServiceUUID() && advertisedDevice->getServiceUUID().toString() == serviceUUID)
-    {
-
-      BLEDevice::getScan()->stop();
-      /*******************************************************************
+      if (advertisedDevice->haveServiceUUID() && advertisedDevice->getServiceUUID().toString() == serviceUUID)
+      {
+        if (connectionCounter > 0)
+        {
+          Serial.println("There is more than one sensor");
+          moreThanOneSensor = true;
+        }
+        BLEDevice::getScan()->stop();
+        /*******************************************************************
               myDevice = new BLEAdvertisedDevice(advertisedDevice);
         *******************************************************************/
-      myDevice[0] = advertisedDevice; /** Just save the reference now, no need to copy the object */
-      doConnect = true;
 
-    } // Found our server
-  }   // onResult
-};    // MyAdvertisedDeviceCallbacks
+        myDevice = advertisedDevice; /** Just save the reference now, no need to copy the object */
+        doConnect = true;
+      } // Found our server
+    }   // onResult
+  }
+}; // MyAdvertisedDeviceCallbacks
 
 //Connect to the BLE Server that has the name, Service, and Characteristics
-bool connectToServer()
+bool connectToServer(std::string device)
 {
   Serial.print("Forming a connection to ");
-  Serial.println(myDevice[0]->getAddress().toString().c_str());
+  Serial.println(device.c_str());
 
-  BLEClient *pClient = BLEDevice::createClient();
+  pClient = BLEDevice::createClient();
   pClient->setClientCallbacks(new MyClientCallback());
   Serial.println(" - Created client");
 
   // Connect to the remove BLE Server.
-  pClient->connect(myDevice[0]);
+  pClient->connect(device);
   Serial.println(" - Connected to server");
 
   // Obtain a reference to the service we are after in the remote BLE server.
@@ -150,18 +167,32 @@ bool connectToServer()
   if (pRemoteSensorCharacteristic->canRead())
   {
     // Note timestamp from documentation: readValue(time_t *timestamp = nullptr);
-    value = atof(pRemoteSensorCharacteristic->readValue().c_str());
+    sensorValue = pRemoteSensorCharacteristic->readValue<float>();
     Serial.print("The characteristic value was: ");
-    Serial.println(value);
+    Serial.println(sensorValue);
+
+    if (!isConnectionComplete)
+    {
+      myDevices[int(sensorValue)] = myDevice->getAddress().toString();
+      isConnectionComplete = true;
+      for (int i = 0; i < sizeof(myDevices) / sizeof(std::string); i++)
+      {
+        if (myDevices[i] == "")
+        {
+          isConnectionComplete = false;
+          break;
+        }
+      }
+    }
   }
 
   // Read the value of the battery characteristic.
   if (pRemoteBatteryCharacteristic->canRead())
   {
     // Note timestamp from documentation: readValue(time_t *timestamp = nullptr);
-    value = atof(pRemoteBatteryCharacteristic->readValue().c_str());
+    batteryValue = pRemoteBatteryCharacteristic-> readValue<uint16_t>();
     Serial.print("The characteristic value was: ");
-    Serial.println(value);
+    Serial.println(batteryValue);
   }
 
   //Assign callback functions for the Characteristics
@@ -196,26 +227,23 @@ void setup()
 
   // Retrieve a Scanner and set the callback we want to use to be informed when we
   // have detected a new device.  Specify that we want active scanning and start the
-  // scan to run for 15 seconds.
+  // scan to run forever.
   BLEScan *pBLEScan = BLEDevice::getScan();
   pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
   pBLEScan->setActiveScan(true);
-  pBLEScan->setInterval(1349);
-  pBLEScan->setWindow(449);
-  pBLEScan->start(0);
+  pBLEScan->start(0, false);
 
   pinMode(ONBOARD_LED, OUTPUT);
 }
 
 void loop()
 {
-  
   // If the flag "doConnect" is true then we have scanned for and found the desired
   // BLE Server with which we wish to connect.  Now we connect to it.  Once we are
   // connected we set the connected flag to be true.
   if (doConnect == true)
   {
-    if (connectToServer())
+    if (connectToServer(myDevice->getAddress().toString()))
     {
       Serial.println("We are now connected to the BLE Server.");
     }
@@ -226,14 +254,43 @@ void loop()
     doConnect = false;
   }
 
-  if (connected)
+  // Assuming that after 1 scan without filling the myDevices array, then amount of sensors < TOTAL_POSSIBLE_LOCATIONS
+  if (connectionCounter >= TOTAL_POSSIBLE_LOCATIONS + 1 && !isConnectionComplete)
   {
-    // Set the characteristic's value to be the array of bytes that is actually a string.
-    /*** Note: write / read value now returns true if successful, false otherwise - try again or disconnect ***/
+    isConnectionComplete = true;
+    BLEDevice::getScan()->stop();
+    int i;
+    for (i = 0; i < sizeof(myDevices) / sizeof(std::string); i++)
+    {
+      if (myDevices[i] != "")
+      {
+        break;
+      }
+    }
+    // Written here to minimize memory usage due to scoping (i.e. instead of in the for loop)
+    connectToServer(myDevices[i]);
   }
   else
   {
-    BLEDevice::getScan()->start(0); // this is just eample to start scan after disconnect, most likely there is better way to do it in arduino
+    connectionCounter++;
+  }
+
+  if (connected && isConnectionComplete)
+  {
+    if (moreThanOneSensor)
+    {
+      Serial.println("There are more than one sensor");
+    }
+    else
+    {
+      Serial.println("There is only one sensor");
+    }
+  }
+  else
+  {
+    Serial.println(connectionCounter);
+    pClient->disconnect();
+    BLEDevice::getScan()->start(1, false); // this is just to start scan after disconnect
   }
 
   delay(1000); // Delay a second between loops.
