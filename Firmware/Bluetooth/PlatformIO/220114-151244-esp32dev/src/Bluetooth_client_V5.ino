@@ -307,7 +307,7 @@ void loop()
   else
   {
     if (connectionCounter >= TOTAL_POSSIBLE_LOCATIONS + 1) {
-      ESP.reset();
+      ESP.restart();
     }
     pClient->disconnect();
     BLEDevice::getScan()->start(1, false); // this is just to start scan after disconnect
