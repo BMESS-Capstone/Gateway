@@ -10,6 +10,7 @@
 //*****Shared with NANO 33 TODO: move to a common refererred .h file***
 // Parameters only for Sensor
 #define BATTERY_INTERVAL_MS 2000
+#define BATTERY_PIN A0
 
 // Parameters only for Gateway
 #define ONBOARD_LED 2
@@ -189,9 +190,10 @@ bool connectToServer(std::string device)
 
     if (!isConnectionComplete)
     {
+      //TODO: Consider adding an algorithm to check if 2 sensors share the same location value
       myDevices[int(sensorValue)] = myDevice->getAddress().toString();
       isConnectionComplete = true;
-      for (int i = 0; i < sizeof(myDevices) / sizeof(std::string); i++)
+      for (int i = 0; i < TOTAL_POSSIBLE_LOCATIONS; i++)
       {
         if (myDevices[i] == "")
         {
@@ -227,7 +229,6 @@ bool connectToServer(std::string device)
       pClient->disconnect();
     }
   }
-
   return true;
 }
 
@@ -275,7 +276,7 @@ void loop()
     BLEDevice::getScan()->stop();
     int i;
     // Connect to the first available sensor
-    for (i = 0; i < sizeof(myDevices) / sizeof(std::string); i++)
+    for (i = 0; i < TOTAL_POSSIBLE_LOCATIONS; i++)
     {
       if (myDevices[i] != "")
       {
@@ -306,6 +307,5 @@ void loop()
     pClient->disconnect();
     BLEDevice::getScan()->start(1, false); // this is just to start scan after disconnect
   }
-
   // delay(1000); // Delay a second between loops (does not affect callbacks - proably runs on the second core)
 } // End of loop
