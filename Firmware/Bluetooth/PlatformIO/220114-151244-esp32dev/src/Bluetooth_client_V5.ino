@@ -10,7 +10,6 @@
 //*****Shared with NANO 33 TODO: move to a common refererred .h file***
 // Parameters only for Sensor
 #define BATTERY_INTERVAL_MS 2000
-#define SENSOR_TRANSMISSiON_WAIT_MS 2000
 
 // Parameters only for Gateway
 #define ONBOARD_LED 2
@@ -296,7 +295,6 @@ void loop()
   {
     if (moreThanOneSensor)
     {
-      Serial.println("There are more than one sensor");
     }
   }
   else
@@ -309,5 +307,5 @@ void loop()
     BLEDevice::getScan()->start(1, false); // this is just to start scan after disconnect
   }
 
-  delay(1000); // Delay a second between loops (does not affect callbacks - proably runs on the second core)
+  // delay(1000); // Delay a second between loops (does not affect callbacks - proably runs on the second core)
 } // End of loop
