@@ -240,7 +240,7 @@ void loop()
   }
 
   // Assuming that after 1 scan without filling the myDevices array, then amount of sensors < TOTAL_POSSIBLE_LOCATIONS
-  if (connectionCounter >= TOTAL_POSSIBLE_LOCATIONS)
+  if (connectionCounter >= TOTAL_POSSIBLE_LOCATIONS + 1)
   {
     isConnectionComplete = true;
     BLEDevice::getScan()->stop();
@@ -255,7 +255,7 @@ void loop()
     // Written here to minimize memory usage due to scoping (i.e. instead of in the for loop)
     connectToServer(myDevices[i]);
   }
-  else if (connectionCounter < TOTAL_POSSIBLE_LOCATIONS)
+  else if (connectionCounter < TOTAL_POSSIBLE_LOCATIONS + 1)
   {
     connectionCounter++;
   }
@@ -306,10 +306,13 @@ void loop()
   }
   else
   {
-    Serial.println(connectionCounter);
+    if (connectionCounter >= TOTAL_POSSIBLE_LOCATIONS + 1) {
+      ESP.reset();
+    }
     pClient->disconnect();
     BLEDevice::getScan()->start(1, false); // this is just to start scan after disconnect
   }
+  Serial.println(connectionCounter);
 
   delay(1000); // Delay a second between loops.
 } // End of loop
