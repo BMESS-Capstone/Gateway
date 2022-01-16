@@ -62,15 +62,18 @@ int batteryValue;
 static void notifyCallback(
     BLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify)
 {
-  if (pBLERemoteCharacteristic->getUUID().toString() == sensorCharacteristicUUID)
+  if (isConnectionComplete)
   {
-    sensorValue = *(float *)pData;
-    Serial.println(sensorValue);
-  }
-  else
-  {
-    batteryValue = *(int *)pData;
-    Serial.println(batteryValue);
+    if (pBLERemoteCharacteristic->getUUID().toString() == sensorCharacteristicUUID)
+    {
+      sensorValue = *(float *)pData;
+      Serial.println(sensorValue);
+    }
+    else
+    {
+      batteryValue = *(int *)pData;
+      Serial.println(batteryValue);
+    }
   }
 }
 
@@ -144,7 +147,8 @@ bool connectToServer(std::string device)
   Serial.println(" - Created client");
 
   // Connect to the remove BLE Server.
-  if (!pClient->connect(device)) {
+  if (!pClient->connect(device))
+  {
     Serial.print("Failed to connect to device: ");
     Serial.println(device.c_str());
     return false;
@@ -207,6 +211,24 @@ bool connectToServer(std::string device)
     Serial.print("The battery characteristic value was: ");
     Serial.println(batteryValue);
   }
+
+  //Assign callback functions for the Characteristics
+  if (pRemoteSensorCharacteristic->canNotify() || pRemoteBatteryCharacteristic->canNotify())
+  {
+    if (!pRemoteSensorCharacteristic->subscribe(true, notifyCallback))
+    {
+      /** Disconnect if subscribe failed */
+      Serial.println("Sensor characteristic subscription failed");
+      pClient->disconnect();
+    }
+    if (!pRemoteBatteryCharacteristic->subscribe(true, notifyCallback))
+    {
+      /** Disconnect if subscribe failed */
+      Serial.println("Battery characteristic subscription failed");
+      pClient->disconnect();
+    }
+  }
+
   return true;
 }
 
@@ -275,48 +297,12 @@ void loop()
     if (moreThanOneSensor)
     {
       Serial.println("There are more than one sensor");
-      //Assign callback functions for the Characteristics
-
-      if (pRemoteSensorCharacteristic->canNotify() || pRemoteBatteryCharacteristic->canNotify())
-      {
-        Serial.println("Characteristic(s) can notify");
-        if (!pRemoteSensorCharacteristic->subscribe(true, notifyCallback))
-        {
-          /** Disconnect if subscribe failed */
-          Serial.println("Sensor characteristic subscription failed");
-          pClient->disconnect();
-        }
-        if (!pRemoteBatteryCharacteristic->subscribe(true, notifyCallback))
-        {
-          /** Disconnect if subscribe failed */
-          Serial.println("Battery characteristic subscription failed");
-          pClient->disconnect();
-        }
-      }
-    }
-    else
-    {
-      //Assign callback functions for the Characteristics
-      if (pRemoteSensorCharacteristic->canNotify() || pRemoteBatteryCharacteristic->canNotify())
-      {
-        if (!pRemoteSensorCharacteristic->subscribe(true, notifyCallback))
-        {
-          /** Disconnect if subscribe failed */
-          Serial.println("Sensor characteristic subscription failed");
-          pClient->disconnect();
-        }
-        if (!pRemoteBatteryCharacteristic->subscribe(true, notifyCallback))
-        {
-          /** Disconnect if subscribe failed */
-          Serial.println("Battery characteristic subscription failed");
-          pClient->disconnect();
-        }
-      }
     }
   }
   else
   {
-    if (connectionCounter > TOTAL_POSSIBLE_LOCATIONS + 1) {
+    if (connectionCounter > TOTAL_POSSIBLE_LOCATIONS + 1)
+    {
       ESP.restart();
     }
     pClient->disconnect();
