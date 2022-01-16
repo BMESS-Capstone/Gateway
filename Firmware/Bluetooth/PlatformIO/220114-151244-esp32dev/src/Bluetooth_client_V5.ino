@@ -240,7 +240,7 @@ void loop()
   }
 
   // Assuming that after 1 scan without filling the myDevices array, then amount of sensors < TOTAL_POSSIBLE_LOCATIONS
-  if (connectionCounter >= TOTAL_POSSIBLE_LOCATIONS)
+  if (connectionCounter >= TOTAL_POSSIBLE_LOCATIONS + 1 && !isConnectionComplete)
   {
     isConnectionComplete = true;
     BLEDevice::getScan()->stop();
@@ -255,7 +255,7 @@ void loop()
     // Written here to minimize memory usage due to scoping (i.e. instead of in the for loop)
     connectToServer(myDevices[i]);
   }
-  else if (connectionCounter < TOTAL_POSSIBLE_LOCATIONS)
+  else
   {
     connectionCounter++;
   }
