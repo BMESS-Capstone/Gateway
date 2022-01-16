@@ -8,9 +8,14 @@
 #include <NimBLEDevice.h>
 
 //*****Shared with NANO 33 TODO: move to a common refererred .h file***
+// Parameters only for Sensor
 #define BATTERY_INTERVAL_MS 2000
 #define SENSOR_TRANSMISSiON_WAIT_MS 2000
 
+// Parameters only for Gateway
+#define ONBOARD_LED 2
+
+// Shared parameters
 #define TOTAL_POSSIBLE_LOCATIONS 4
 #define LEFT_ARM 0
 #define RIGHT_ARM 1
@@ -22,8 +27,6 @@
 #define SENSOR_CHAR_UUID "fec40b26-757a-11ec-90d6-0242ac120003"
 #define BATTERY_CHAR_UUID "fec40dc4-757a-11ec-90d6-0242ac120003"
 //********************************************************************
-
-#define ONBOARD_LED 2
 
 /* UUID's of the service, characteristic that we want to read and/or write */
 // BLE Services
@@ -141,7 +144,11 @@ bool connectToServer(std::string device)
   Serial.println(" - Created client");
 
   // Connect to the remove BLE Server.
-  pClient->connect(device);
+  if (!pClient->connect(device)) {
+    Serial.print("Failed to connect to device: ");
+    Serial.println(device.c_str());
+    return false;
+  }
   Serial.println(" - Connected to server");
 
   // Obtain a reference to the service we are after in the remote BLE server.
@@ -150,7 +157,7 @@ bool connectToServer(std::string device)
   {
     Serial.print("Failed to find our service UUID: ");
     Serial.println(serviceUUID);
-    return (false);
+    return false;
   }
   Serial.println(" - Found our service");
 
@@ -174,7 +181,7 @@ bool connectToServer(std::string device)
   {
     // Note timestamp from documentation: readValue(time_t *timestamp = nullptr);
     sensorValue = pRemoteSensorCharacteristic->readValue<float>();
-    Serial.print("The characteristic value was: ");
+    Serial.print("The sensor characteristic value was: ");
     Serial.println(sensorValue);
 
     if (!isConnectionComplete)
@@ -197,7 +204,7 @@ bool connectToServer(std::string device)
   {
     // Note timestamp from documentation: readValue(time_t *timestamp = nullptr);
     batteryValue = pRemoteBatteryCharacteristic->readValue<uint16_t>();
-    Serial.print("The characteristic value was: ");
+    Serial.print("The battery characteristic value was: ");
     Serial.println(batteryValue);
   }
   return true;
@@ -315,7 +322,6 @@ void loop()
     pClient->disconnect();
     BLEDevice::getScan()->start(1, false); // this is just to start scan after disconnect
   }
-  Serial.println(connectionCounter);
 
   delay(1000); // Delay a second between loops (does not affect callbacks - proably runs on the second core)
 } // End of loop
