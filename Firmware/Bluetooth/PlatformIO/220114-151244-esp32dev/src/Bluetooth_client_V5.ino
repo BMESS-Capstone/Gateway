@@ -41,6 +41,7 @@ static boolean connected = false;
 static boolean isConnectionComplete = false;
 static boolean moreThanOneSensor = false;
 static uint8_t connectionCounter = 0;
+static uint8_t iterationCounter = 0;
 
 //Advertised device of the peripheral device. Address will be found during scanning...
 static BLEAdvertisedDevice *myDevice;
@@ -57,12 +58,16 @@ int batteryValue;
 static void notifyCallback(
     BLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify)
 {
-  Serial.print("Notify callback for characteristic ");
-  Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
-  Serial.print(" of data length ");
-  Serial.println(length);
-  Serial.print("data: ");
-  Serial.println((char *)pData);
+  if (pBLERemoteCharacteristic->getUUID().toString() == sensorCharacteristicUUID)
+  {
+    sensorValue = *(float *)pData;
+    Serial.println(sensorValue);
+  }
+  else
+  {
+    batteryValue = *(int *)pData;
+    Serial.println(batteryValue);
+  }
 }
 
 //Callback function for the BLE client (i.e. this device)
@@ -190,29 +195,9 @@ bool connectToServer(std::string device)
   if (pRemoteBatteryCharacteristic->canRead())
   {
     // Note timestamp from documentation: readValue(time_t *timestamp = nullptr);
-    batteryValue = pRemoteBatteryCharacteristic-> readValue<uint16_t>();
+    batteryValue = pRemoteBatteryCharacteristic->readValue<uint16_t>();
     Serial.print("The characteristic value was: ");
     Serial.println(batteryValue);
-  }
-
-  //Assign callback functions for the Characteristics
-  if (pRemoteSensorCharacteristic->canNotify() || pRemoteBatteryCharacteristic->canNotify())
-  {
-    Serial.println("Characteristic(s) can notify");
-    if (!pRemoteSensorCharacteristic->subscribe(true, notifyCallback))
-    {
-      /** Disconnect if subscribe failed */
-      Serial.println("Sensor characteristic subscription failed");
-      pClient->disconnect();
-      return false;
-    }
-    if (!pRemoteBatteryCharacteristic->subscribe(true, notifyCallback))
-    {
-      /** Disconnect if subscribe failed */
-      Serial.println("Battery characteristic subscription failed");
-      pClient->disconnect();
-      return false;
-    }
   }
   return true;
 }
@@ -255,7 +240,7 @@ void loop()
   }
 
   // Assuming that after 1 scan without filling the myDevices array, then amount of sensors < TOTAL_POSSIBLE_LOCATIONS
-  if (connectionCounter >= TOTAL_POSSIBLE_LOCATIONS + 1 && !isConnectionComplete)
+  if (connectionCounter >= TOTAL_POSSIBLE_LOCATIONS)
   {
     isConnectionComplete = true;
     BLEDevice::getScan()->stop();
@@ -270,7 +255,7 @@ void loop()
     // Written here to minimize memory usage due to scoping (i.e. instead of in the for loop)
     connectToServer(myDevices[i]);
   }
-  else
+  else if (connectionCounter < TOTAL_POSSIBLE_LOCATIONS)
   {
     connectionCounter++;
   }
@@ -280,10 +265,43 @@ void loop()
     if (moreThanOneSensor)
     {
       Serial.println("There are more than one sensor");
+      //Assign callback functions for the Characteristics
+
+      if (pRemoteSensorCharacteristic->canNotify() || pRemoteBatteryCharacteristic->canNotify())
+      {
+        Serial.println("Characteristic(s) can notify");
+        if (!pRemoteSensorCharacteristic->subscribe(true, notifyCallback))
+        {
+          /** Disconnect if subscribe failed */
+          Serial.println("Sensor characteristic subscription failed");
+          pClient->disconnect();
+        }
+        if (!pRemoteBatteryCharacteristic->subscribe(true, notifyCallback))
+        {
+          /** Disconnect if subscribe failed */
+          Serial.println("Battery characteristic subscription failed");
+          pClient->disconnect();
+        }
+      }
     }
     else
     {
-      Serial.println("There is only one sensor");
+      //Assign callback functions for the Characteristics
+      if (pRemoteSensorCharacteristic->canNotify() || pRemoteBatteryCharacteristic->canNotify())
+      {
+        // if (!pRemoteSensorCharacteristic->subscribe(true, notifyCallback))
+        // {
+        //   /** Disconnect if subscribe failed */
+        //   Serial.println("Sensor characteristic subscription failed");
+        //   pClient->disconnect();
+        // }
+        if (!pRemoteBatteryCharacteristic->subscribe(true, notifyCallback))
+        {
+          /** Disconnect if subscribe failed */
+          Serial.println("Battery characteristic subscription failed");
+          pClient->disconnect();
+        }
+      }
     }
   }
   else
