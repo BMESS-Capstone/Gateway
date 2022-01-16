@@ -8,7 +8,8 @@
 #include <NimBLEDevice.h>
 
 //*****Shared with NANO 33 TODO: move to a common refererred .h file***
-#define BUFFER_SIZE 40
+#define BATTERY_INTERVAL_MS 2000
+#define SENSOR_TRANSMISSiON_WAIT_MS 2000
 
 #define TOTAL_POSSIBLE_LOCATIONS 4
 #define LEFT_ARM 0
@@ -240,11 +241,12 @@ void loop()
   }
 
   // Assuming that after 1 scan without filling the myDevices array, then amount of sensors < TOTAL_POSSIBLE_LOCATIONS
-  if (connectionCounter >= TOTAL_POSSIBLE_LOCATIONS + 1)
+  if (connectionCounter > TOTAL_POSSIBLE_LOCATIONS && !isConnectionComplete)
   {
     isConnectionComplete = true;
     BLEDevice::getScan()->stop();
     int i;
+    // Connect to the first available sensor
     for (i = 0; i < sizeof(myDevices) / sizeof(std::string); i++)
     {
       if (myDevices[i] != "")
@@ -254,8 +256,9 @@ void loop()
     }
     // Written here to minimize memory usage due to scoping (i.e. instead of in the for loop)
     connectToServer(myDevices[i]);
+    connectionCounter++;
   }
-  else if (connectionCounter < TOTAL_POSSIBLE_LOCATIONS + 1)
+  else if (connectionCounter <= TOTAL_POSSIBLE_LOCATIONS)
   {
     connectionCounter++;
   }
@@ -289,12 +292,12 @@ void loop()
       //Assign callback functions for the Characteristics
       if (pRemoteSensorCharacteristic->canNotify() || pRemoteBatteryCharacteristic->canNotify())
       {
-        // if (!pRemoteSensorCharacteristic->subscribe(true, notifyCallback))
-        // {
-        //   /** Disconnect if subscribe failed */
-        //   Serial.println("Sensor characteristic subscription failed");
-        //   pClient->disconnect();
-        // }
+        if (!pRemoteSensorCharacteristic->subscribe(true, notifyCallback))
+        {
+          /** Disconnect if subscribe failed */
+          Serial.println("Sensor characteristic subscription failed");
+          pClient->disconnect();
+        }
         if (!pRemoteBatteryCharacteristic->subscribe(true, notifyCallback))
         {
           /** Disconnect if subscribe failed */
@@ -306,7 +309,7 @@ void loop()
   }
   else
   {
-    if (connectionCounter >= TOTAL_POSSIBLE_LOCATIONS + 1) {
+    if (connectionCounter > TOTAL_POSSIBLE_LOCATIONS + 1) {
       ESP.restart();
     }
     pClient->disconnect();
@@ -314,5 +317,5 @@ void loop()
   }
   Serial.println(connectionCounter);
 
-  delay(1000); // Delay a second between loops.
+  delay(1000); // Delay a second between loops (does not affect callbacks - proably runs on the second core)
 } // End of loop
