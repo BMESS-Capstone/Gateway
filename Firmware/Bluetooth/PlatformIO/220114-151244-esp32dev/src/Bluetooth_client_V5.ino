@@ -197,15 +197,6 @@ bool connectToServer(std::string device)
     {
       //TODO: Consider adding an algorithm to check if 2 sensors share the same location value
       myDevices[int(sensorValue)] = myDevice->getAddress().toString();
-      isConnectionComplete = true;
-      for (int i = 0; i < TOTAL_POSSIBLE_LOCATIONS; i++)
-      {
-        if (myDevices[i] == "")
-        {
-          isConnectionComplete = false;
-          break;
-        }
-      }
     }
   }
 
