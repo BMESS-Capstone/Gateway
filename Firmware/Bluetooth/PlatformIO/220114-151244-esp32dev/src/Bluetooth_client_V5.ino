@@ -44,8 +44,9 @@ static boolean doConnect = false;
 static boolean connected = false;
 static boolean isConnectionComplete = false;
 static boolean moreThanOneSensor = false;
-static uint8_t connectionCounter = 0;
-static uint8_t iterationCounter = 0;
+static uint8_t connectionCounter;
+static uint8_t iterationCounter;
+static uint8_t deviceIndex;
 
 //Advertised device of the peripheral device. Address will be found during scanning...
 static BLEAdvertisedDevice *myDevice;
@@ -68,6 +69,10 @@ static void notifyCallback(
     {
       sensorValue = *(float *)pData;
       Serial.println(sensorValue);
+      if (moreThanOneSensor)
+      {
+        iterationCounter++;
+      }
     }
     else
     {
@@ -274,7 +279,6 @@ void loop()
   {
     isConnectionComplete = true;
     BLEDevice::getScan()->stop();
-    int i;
     // Connect to the first available sensor
     for (i = 0; i < TOTAL_POSSIBLE_LOCATIONS; i++)
     {
@@ -294,18 +298,21 @@ void loop()
 
   if (connected && isConnectionComplete)
   {
-    if (moreThanOneSensor)
+    if (moreThanOneSensor && iterationCounter > 20)
     {
+      pClient->disconnect();
+
     }
   }
-  else
+}
+else
+{
+  if (connectionCounter > TOTAL_POSSIBLE_LOCATIONS + 1)
   {
-    if (connectionCounter > TOTAL_POSSIBLE_LOCATIONS + 1)
-    {
-      ESP.restart();
-    }
-    pClient->disconnect();
-    BLEDevice::getScan()->start(1, false); // this is just to start scan after disconnect
+    ESP.restart();
   }
-  // delay(1000); // Delay a second between loops (does not affect callbacks - proably runs on the second core)
+  pClient->disconnect();
+  BLEDevice::getScan()->start(1, false); // this is just to start scan after disconnect
+}
+// delay(1000); // Delay a second between loops (does not affect callbacks - proably runs on the second core)
 } // End of loop
