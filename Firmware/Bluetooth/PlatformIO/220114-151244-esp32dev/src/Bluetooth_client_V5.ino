@@ -203,7 +203,7 @@ bool connectToServer(std::string device)
   // Read the value of the battery characteristic.
   if (pRemoteBatteryCharacteristic->canRead())
   {
-    // Note timestamp from documentation: readValue(time_t *timestamp = nullptr);
+    // TODO: Note timestamp from documentation: readValue(time_t *timestamp = nullptr);
     batteryValue = pRemoteBatteryCharacteristic->readValue<uint16_t>();
     Serial.print("The battery characteristic value was: ");
     Serial.println(batteryValue);
@@ -271,15 +271,15 @@ void loop()
     isConnectionComplete = true;
     BLEDevice::getScan()->stop();
     // Connect to the first available sensor
-    for (i = 0; i < TOTAL_POSSIBLE_LOCATIONS; i++)
+    for (deviceIndex = 0; deviceIndex < TOTAL_POSSIBLE_LOCATIONS; deviceIndex++)
     {
-      if (myDevices[i] != "")
+      if (myDevices[deviceIndex] != "")
       {
         break;
       }
     }
     // Written here to minimize memory usage due to scoping (i.e. instead of in the for loop)
-    connectToServer(myDevices[i]);
+    connectToServer(myDevices[deviceIndex]);
     connectionCounter++;
   }
   else if (connectionCounter <= TOTAL_POSSIBLE_LOCATIONS)
@@ -291,19 +291,26 @@ void loop()
   {
     if (moreThanOneSensor && iterationCounter > 20)
     {
+      iterationCounter = 0;
       pClient->disconnect();
-
+      do
+      {
+        if (deviceIndex < TOTAL_POSSIBLE_LOCATIONS - 1)
+          deviceIndex++;
+        else
+          deviceIndex = 0;
+      } while (myDevices[deviceIndex] == "");
+      connectToServer(myDevices[deviceIndex]);
     }
   }
-}
-else
-{
-  if (connectionCounter > TOTAL_POSSIBLE_LOCATIONS + 1)
+  else
   {
-    ESP.restart();
+    if (connectionCounter > TOTAL_POSSIBLE_LOCATIONS + 1)
+    {
+      ESP.restart();
+    }
+    pClient->disconnect();
+    BLEDevice::getScan()->start(1, false); // this is just to start scan after disconnect
   }
-  pClient->disconnect();
-  BLEDevice::getScan()->start(1, false); // this is just to start scan after disconnect
-}
-// delay(1000); // Delay a second between loops (does not affect callbacks - proably runs on the second core)
+  // delay(1000); // Delay a second between loops (does not affect callbacks - proably runs on the second core)
 } // End of loop
