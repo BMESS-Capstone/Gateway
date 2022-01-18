@@ -1,5 +1,5 @@
 /**
-  BLE Client for the pIRfusiX sensor system Version 4
+  BLE Client for the pIRfusiX sensor system Version 5
   Note: uses NimBLE instead of orginal BLEDevice (less resource intensive)
   Consider: It seems like NimBLE (and ESP32 Arduino BLE) can support up to 3 simulataneous connections
 
