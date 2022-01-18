@@ -66,7 +66,6 @@ static void notifyCallback(
 {
   if (isConnectionComplete)
   {
-    //TODO: Try adding RTC time from timestamp pulled from from readValue()
     if (pBLERemoteCharacteristic->getUUID().toString() == sensorCharacteristicUUID)
     {
       sensorValue = *(float *)pData;
@@ -190,7 +189,6 @@ bool connectToServer(std::string device)
   // Read the value of the sensor characteristic.
   if (pRemoteSensorCharacteristic->canRead())
   {
-    // TODO: Note timestamp from documentation: readValue(time_t *timestamp = nullptr);
     sensorValue = pRemoteSensorCharacteristic->readValue<float>();
     Serial.print("The sensor characteristic value was: ");
     Serial.println(sensorValue);
@@ -218,7 +216,6 @@ bool connectToServer(std::string device)
   // Read the value of the battery characteristic.
   if (pRemoteBatteryCharacteristic->canRead())
   {
-    // TODO: Note timestamp from documentation: readValue(time_t *timestamp = nullptr);
     batteryValue = pRemoteBatteryCharacteristic->readValue<uint16_t>();
     Serial.print("The battery characteristic value was: ");
     Serial.println(batteryValue);
