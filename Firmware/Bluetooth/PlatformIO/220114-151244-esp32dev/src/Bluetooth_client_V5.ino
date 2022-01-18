@@ -229,12 +229,16 @@ bool connectToServer(std::string device)
       /** Disconnect if subscribe failed */
       Serial.println("Sensor characteristic subscription failed");
       pClient->disconnect();
+      while (connected)
+        delay(1);
     }
     if (!pRemoteBatteryCharacteristic->subscribe(true, notifyCallback))
     {
       /** Disconnect if subscribe failed */
       Serial.println("Battery characteristic subscription failed");
       pClient->disconnect();
+      while (connected)
+        delay(1);
     }
   }
   return true;
