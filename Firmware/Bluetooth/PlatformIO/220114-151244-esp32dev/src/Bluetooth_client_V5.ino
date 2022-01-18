@@ -193,10 +193,18 @@ bool connectToServer(std::string device)
     Serial.print("The sensor characteristic value was: ");
     Serial.println(sensorValue);
 
-    if (!isConnectionComplete)
+    if (!isConnectionComplete && myDevices[int(sensorValue)] == "")
     {
-      //TODO: Consider adding an algorithm to check if 2 sensors share the same location value
       myDevices[int(sensorValue)] = myDevice->getAddress().toString();
+    }
+    else if (myDevices[int(sensorValue)] != "") {
+      Serial.println("2 sensors have the same location value");
+      while(1) {
+        digitalWrite(ONBOARD_LED, HIGH);
+        delay(300);
+        digitalWrite(ONBOARD_LED, LOW);
+        delay(300);
+      }
     }
   }
 
