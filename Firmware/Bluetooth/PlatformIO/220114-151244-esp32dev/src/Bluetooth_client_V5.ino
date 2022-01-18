@@ -188,22 +188,27 @@ bool connectToServer(std::string device)
   // Read the value of the sensor characteristic.
   if (pRemoteSensorCharacteristic->canRead())
   {
-    // Note timestamp from documentation: readValue(time_t *timestamp = nullptr);
+    // TODO: Note timestamp from documentation: readValue(time_t *timestamp = nullptr);
     sensorValue = pRemoteSensorCharacteristic->readValue<float>();
     Serial.print("The sensor characteristic value was: ");
     Serial.println(sensorValue);
 
-    if (!isConnectionComplete && myDevices[int(sensorValue)] == "")
+    if (!isConnectionComplete)
     {
-      myDevices[int(sensorValue)] = myDevice->getAddress().toString();
-    }
-    else if (myDevices[int(sensorValue)] != "") {
-      Serial.println("2 sensors have the same location value");
-      while(1) {
-        digitalWrite(ONBOARD_LED, HIGH);
-        delay(300);
-        digitalWrite(ONBOARD_LED, LOW);
-        delay(300);
+      if (myDevices[int(sensorValue)] == "")
+      {
+        myDevices[int(sensorValue)] = myDevice->getAddress().toString();
+      }
+      else
+      {
+        Serial.println("2 sensors have the same location value");
+        while (1)
+        {
+          digitalWrite(ONBOARD_LED, HIGH);
+          delay(300);
+          digitalWrite(ONBOARD_LED, LOW);
+          delay(300);
+        }
       }
     }
   }
@@ -301,7 +306,7 @@ void loop()
     {
       iterationCounter = 0;
       pClient->disconnect();
-      while(connected)
+      while (connected)
         delay(1);
       do
       {
@@ -320,8 +325,8 @@ void loop()
       ESP.restart();
     }
     pClient->disconnect();
-    while(connected)
-        delay(1);
+    while (connected)
+      delay(1);
     BLEDevice::getScan()->start(1, false); // this is just to start scan after disconnect
   }
   // delay(1000); // Delay a second between loops (does not affect callbacks - proably runs on the second core)
