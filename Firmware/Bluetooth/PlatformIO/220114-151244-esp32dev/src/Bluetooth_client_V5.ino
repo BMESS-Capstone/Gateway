@@ -293,6 +293,8 @@ void loop()
     {
       iterationCounter = 0;
       pClient->disconnect();
+      while(connected)
+        delay(1);
       do
       {
         if (deviceIndex < TOTAL_POSSIBLE_LOCATIONS - 1)
