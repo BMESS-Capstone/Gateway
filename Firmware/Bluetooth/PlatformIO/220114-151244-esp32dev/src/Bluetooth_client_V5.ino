@@ -312,6 +312,8 @@ void loop()
       ESP.restart();
     }
     pClient->disconnect();
+    while(connected)
+        delay(1);
     BLEDevice::getScan()->start(1, false); // this is just to start scan after disconnect
   }
   // delay(1000); // Delay a second between loops (does not affect callbacks - proably runs on the second core)
