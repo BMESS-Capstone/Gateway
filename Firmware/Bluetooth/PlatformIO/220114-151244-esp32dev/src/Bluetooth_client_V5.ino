@@ -1,6 +1,7 @@
 /**
   BLE Client for the pIRfusiX sensor system Version 4
   Note: uses NimBLE instead of orginal BLEDevice (less resource intensive)
+  Consider: It seems like NimBLE (and ESP32 Arduino BLE) can support up to 3 simulataneous connections
 
   Author: Khaled Elmalawany
 */
@@ -65,6 +66,7 @@ static void notifyCallback(
 {
   if (isConnectionComplete)
   {
+    //TODO: Try adding RTC time from timestamp pulled from from readValue()
     if (pBLERemoteCharacteristic->getUUID().toString() == sensorCharacteristicUUID)
     {
       sensorValue = *(float *)pData;
