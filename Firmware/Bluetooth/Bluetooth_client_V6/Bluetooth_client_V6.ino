@@ -49,10 +49,12 @@ static boolean moreThanOneSensor = false;
 static uint8_t connectionCounter;
 static uint8_t iterationCounter;
 static uint8_t deviceIndex;
+static uint8_t brockenDevicesCounter = 0;
 
 //Advertised device of the peripheral device. Address will be found during scanning...
 static BLEAdvertisedDevice *myDevice;
 static std::string myDevices[TOTAL_POSSIBLE_LOCATIONS];
+static std::string brockenDevices[TOTAL_POSSIBLE_LOCATIONS];
 
 //Characteristic that we want to read
 static BLERemoteCharacteristic *pRemoteSensorCharacteristic;
@@ -88,8 +90,10 @@ class MyClientCallback : public BLEClientCallbacks {
 //Scan for BLE servers and find the first one that advertises the service we are looking for.
 class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
     void onResult(BLEAdvertisedDevice *advertisedDevice) {
-      std::string *address = std::find(std::begin(myDevices), std::end(myDevices), advertisedDevice->getAddress().toString());
-      if (address == std::end(myDevices)) {
+      std::__cxx11::string add = advertisedDevice->getAddress().toString();
+      std::string *address = std::find(std::begin(myDevices), std::end(myDevices), add);
+      std::string *brockenAddress = std::find(std::begin(brockenDevices), std::end(brockenDevices), add);
+      if (address == std::end(myDevices) && brockenAddress == std::end(brockenDevices)) {
         if (advertisedDevice->haveServiceUUID() && advertisedDevice->getServiceUUID().toString() == serviceUUID) {
           if (connectionCounter > 0)
             moreThanOneSensor = true;
@@ -97,27 +101,63 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
           myDevice = advertisedDevice; /** Just save the reference now, no need to copy the object */
           doConnect = true;
         } // Found our server
-      }
+      } // Check for duplicated address
     }// onResult
 }; // MyAdvertisedDeviceCallbacks
 
 //Connect to the BLE Server that has the name, Service, and Characteristics
-void connectToServer(std::string device) {
+boolean connectToServer(std::string device) {
   pClient = BLEDevice::createClient();
   pClient->setClientCallbacks(new MyClientCallback());
 
   // Connect to the remote BLE Server.
-  pClient->connect(device);
+  if (!pClient->connect(device))
+    return false;
 
   // Obtain a reference to the service we are after in the remote BLE server.
   BLERemoteService *pRemoteService = pClient->getService(serviceUUID);
+  if (pRemoteService == nullptr) {
+    pClient->disconnect();
+    while (connected)
+      delay(1);
+    return false;
+  }
 
   // Obtain a reference to the characteristics in the service of the remote BLE server.
   pRemoteSensorCharacteristic = pRemoteService->getCharacteristic(sensorCharacteristicUUID);
+  if (pRemoteSensorCharacteristic == nullptr) {
+    pClient->disconnect();
+    while (connected)
+      delay(1);
+    return false;
+  }
   pRemoteBatteryCharacteristic = pRemoteService->getCharacteristic(batteryCharacteristicUUID);
+  if (pRemoteBatteryCharacteristic == nullptr) {
+    pClient->disconnect();
+    while (connected)
+      delay(1);
+    return false;
+  }
 
-  // Read the value of the sensor characteristic.
-  sensorValue = pRemoteSensorCharacteristic->readValue<float>();
+  if (pRemoteSensorCharacteristic->canRead() && pRemoteBatteryCharacteristic->canRead()) {
+    // Read the values of the characteristics.
+    sensorValue = pRemoteSensorCharacteristic->readValue<float>();
+    Serial.println(int(sensorValue));
+    batteryValue = pRemoteBatteryCharacteristic->readValue<uint16_t>();
+  } else {
+    pClient->disconnect();
+    while (connected)
+      delay(1);
+    return false;
+  }
+
+  //Assign callback functions for the Characteristics
+  if (!pRemoteSensorCharacteristic->canNotify() || !pRemoteBatteryCharacteristic-> canNotify()) {
+    pClient->disconnect();
+    while (connected)
+      delay(1);
+    return false;
+  }
 
   if (!isConnectionComplete) {
     if (myDevices[int(sensorValue)] == "")
@@ -126,19 +166,18 @@ void connectToServer(std::string device) {
       Serial.println("2 sensors have the same location value");
       while (1) {
         digitalWrite(ONBOARD_LED, HIGH);
-        delay(300);
+        delay(500);
         digitalWrite(ONBOARD_LED, LOW);
-        delay(300);
+        delay(500);
       }
     }
   }
 
-  // Read the value of the battery characteristic.
-  batteryValue = pRemoteBatteryCharacteristic->readValue<uint16_t>();
-
-  //Assign callback functions for the Characteristics
+  //Subscribe and assign callbacks
   pRemoteSensorCharacteristic->subscribe(true, notifyCallback);
   pRemoteBatteryCharacteristic->subscribe(true, notifyCallback);
+
+  return true;
 }
 
 void setup()
@@ -158,7 +197,25 @@ void setup()
 
 void loop() {
   if (doConnect) {
-    connectToServer(myDevice->getAddress().toString());
+    if (!connectToServer(myDevice->getAddress().toString())) {
+      brockenDevices[brockenDevicesCounter] = myDevice->getAddress().toString();
+      brockenDevicesCounter++;
+      //Algorithm to ensure brocken sensor does not affect moreThanOneSensor
+      int tempCounter = 0;
+      for (int i = 0; i < TOTAL_POSSIBLE_LOCATIONS; i++) {
+        if (myDevices[i] != "")
+          tempCounter++;
+      }
+      if (tempCounter == 1)
+        moreThanOneSensor = 0;
+      //Visual of error
+      for (int i = 0; i < 5; i++) {
+        digitalWrite(ONBOARD_LED, HIGH);
+        delay(200);
+        digitalWrite(ONBOARD_LED, LOW);
+        delay(200);
+      }
+    }
     doConnect = false;
   }
 
@@ -185,13 +242,15 @@ void loop() {
       pClient->disconnect();
       while (connected)
         delay(1);
+LOOP:
       do {
         if (deviceIndex < TOTAL_POSSIBLE_LOCATIONS - 1)
           deviceIndex++;
         else
           deviceIndex = 0;
       } while (myDevices[deviceIndex] == "");
-      connectToServer(myDevices[deviceIndex]);
+      if (!connectToServer(myDevices[deviceIndex]))
+        goto LOOP;
     }
   } else {
     if (connectionCounter > TOTAL_POSSIBLE_LOCATIONS + 1) {
