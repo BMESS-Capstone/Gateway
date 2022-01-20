@@ -142,7 +142,6 @@ boolean connectToServer(std::string device) {
   if (pRemoteSensorCharacteristic->canRead() && pRemoteBatteryCharacteristic->canRead()) {
     // Read the values of the characteristics.
     sensorValue = pRemoteSensorCharacteristic->readValue<float>();
-    Serial.println(int(sensorValue));
     batteryValue = pRemoteBatteryCharacteristic->readValue<uint16_t>();
   } else {
     pClient->disconnect();
