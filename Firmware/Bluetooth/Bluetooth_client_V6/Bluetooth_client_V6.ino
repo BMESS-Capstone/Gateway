@@ -199,14 +199,6 @@ void loop() {
     if (!connectToServer(myDevice->getAddress().toString())) {
       brockenDevices[brockenDevicesCounter] = myDevice->getAddress().toString();
       brockenDevicesCounter++;
-      //Algorithm to ensure brocken sensor does not affect moreThanOneSensor
-      int tempCounter = 0;
-      for (int i = 0; i < TOTAL_POSSIBLE_LOCATIONS; i++) {
-        if (myDevices[i] != "")
-          tempCounter++;
-      }
-      if (tempCounter == 1)
-        moreThanOneSensor = 0;
       //Visual of error
       for (int i = 0; i < 5; i++) {
         digitalWrite(ONBOARD_LED, HIGH);
@@ -215,6 +207,14 @@ void loop() {
         delay(200);
       }
     }
+    //Algorithm to ensure brocken sensor does not affect moreThanOneSensor
+    int tempCounter = 0;
+    for (int i = 0; i < TOTAL_POSSIBLE_LOCATIONS; i++) {
+      if (myDevices[i] != "")
+        tempCounter++;
+    }
+    if (tempCounter == 1)
+      moreThanOneSensor = 0;
     doConnect = false;
   }
 
