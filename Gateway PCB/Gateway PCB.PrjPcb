@@ -109,23 +109,6 @@ GenerateClassCluster=0
 DocumentUniqueId=WHILRUFV
 
 [Document5]
-DocumentPath=CAMtastic1.Cam
-AnnotationEnabled=1
-AnnotateStartValue=1
-AnnotationIndexControlEnabled=0
-AnnotateSuffix=
-AnnotateScope=All
-AnnotateOrder=-1
-DoLibraryUpdate=1
-DoDatabaseUpdate=1
-ClassGenCCAutoEnabled=1
-ClassGenCCAutoRoomEnabled=1
-ClassGenNCAutoScope=None
-DItemRevisionGUID=
-GenerateClassCluster=0
-DocumentUniqueId=
-
-[Document6]
 DocumentPath=Job Gateway.OutJob
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -151,146 +134,58 @@ DocumentPath=Project Outputs for Gateway PCB\NC Drill\Gateway Board.DRR
 DItemRevisionGUID=
 
 [GeneratedDocument3]
-DocumentPath=Project Outputs for Free Documents\Gerber\Gateway Board.EXTREP
-DItemRevisionGUID=
-
-[GeneratedDocument4]
-DocumentPath=Project Outputs for Gateway PCB\Gateway Board.EXTREP
-DItemRevisionGUID=
-
-[GeneratedDocument5]
 DocumentPath=Project Outputs for Gateway PCB\Gerber\Gateway Board.EXTREP
 DItemRevisionGUID=
 
-[GeneratedDocument6]
-DocumentPath=Project Outputs for Free Documents\Gerber\Gateway Board.GBL
-DItemRevisionGUID=
-
-[GeneratedDocument7]
-DocumentPath=Project Outputs for Gateway PCB\Gateway Board.GBL
-DItemRevisionGUID=
-
-[GeneratedDocument8]
+[GeneratedDocument4]
 DocumentPath=Project Outputs for Gateway PCB\Gerber\Gateway Board.GBL
 DItemRevisionGUID=
 
-[GeneratedDocument9]
-DocumentPath=Project Outputs for Free Documents\Gerber\Gateway Board.GBO
-DItemRevisionGUID=
-
-[GeneratedDocument10]
-DocumentPath=Project Outputs for Gateway PCB\Gateway Board.GBO
-DItemRevisionGUID=
-
-[GeneratedDocument11]
+[GeneratedDocument5]
 DocumentPath=Project Outputs for Gateway PCB\Gerber\Gateway Board.GBO
 DItemRevisionGUID=
 
-[GeneratedDocument12]
-DocumentPath=Project Outputs for Free Documents\Gerber\Gateway Board.GBP
-DItemRevisionGUID=
-
-[GeneratedDocument13]
-DocumentPath=Project Outputs for Gateway PCB\Gateway Board.GBP
-DItemRevisionGUID=
-
-[GeneratedDocument14]
+[GeneratedDocument6]
 DocumentPath=Project Outputs for Gateway PCB\Gerber\Gateway Board.GBP
 DItemRevisionGUID=
 
-[GeneratedDocument15]
-DocumentPath=Project Outputs for Free Documents\Gerber\Gateway Board.GBS
-DItemRevisionGUID=
-
-[GeneratedDocument16]
-DocumentPath=Project Outputs for Gateway PCB\Gateway Board.GBS
-DItemRevisionGUID=
-
-[GeneratedDocument17]
+[GeneratedDocument7]
 DocumentPath=Project Outputs for Gateway PCB\Gerber\Gateway Board.GBS
 DItemRevisionGUID=
 
-[GeneratedDocument18]
+[GeneratedDocument8]
 DocumentPath=Project Outputs for Gateway PCB\Gerber\Gateway Board.GM2
 DItemRevisionGUID=
 
-[GeneratedDocument19]
-DocumentPath=Project Outputs for Free Documents\Gerber\Gateway Board.GTL
-DItemRevisionGUID=
-
-[GeneratedDocument20]
-DocumentPath=Project Outputs for Gateway PCB\Gateway Board.GTL
-DItemRevisionGUID=
-
-[GeneratedDocument21]
+[GeneratedDocument9]
 DocumentPath=Project Outputs for Gateway PCB\Gerber\Gateway Board.GTL
 DItemRevisionGUID=
 
-[GeneratedDocument22]
-DocumentPath=Project Outputs for Free Documents\Gerber\Gateway Board.GTO
-DItemRevisionGUID=
-
-[GeneratedDocument23]
-DocumentPath=Project Outputs for Gateway PCB\Gateway Board.GTO
-DItemRevisionGUID=
-
-[GeneratedDocument24]
+[GeneratedDocument10]
 DocumentPath=Project Outputs for Gateway PCB\Gerber\Gateway Board.GTO
 DItemRevisionGUID=
 
-[GeneratedDocument25]
-DocumentPath=Project Outputs for Free Documents\Gerber\Gateway Board.GTP
-DItemRevisionGUID=
-
-[GeneratedDocument26]
-DocumentPath=Project Outputs for Gateway PCB\Gateway Board.GTP
-DItemRevisionGUID=
-
-[GeneratedDocument27]
+[GeneratedDocument11]
 DocumentPath=Project Outputs for Gateway PCB\Gerber\Gateway Board.GTP
 DItemRevisionGUID=
 
-[GeneratedDocument28]
-DocumentPath=Project Outputs for Free Documents\Gerber\Gateway Board.GTS
-DItemRevisionGUID=
-
-[GeneratedDocument29]
-DocumentPath=Project Outputs for Gateway PCB\Gateway Board.GTS
-DItemRevisionGUID=
-
-[GeneratedDocument30]
+[GeneratedDocument12]
 DocumentPath=Project Outputs for Gateway PCB\Gerber\Gateway Board.GTS
 DItemRevisionGUID=
 
-[GeneratedDocument31]
+[GeneratedDocument13]
 DocumentPath=Project Outputs for Gateway PCB\NC Drill\Gateway Board.LDP
 DItemRevisionGUID=
 
-[GeneratedDocument32]
-DocumentPath=Project Outputs for Free Documents\Gerber\Gateway Board.REP
-DItemRevisionGUID=
-
-[GeneratedDocument33]
-DocumentPath=Project Outputs for Gateway PCB\Gateway Board.REP
-DItemRevisionGUID=
-
-[GeneratedDocument34]
+[GeneratedDocument14]
 DocumentPath=Project Outputs for Gateway PCB\Gerber\Gateway Board.REP
 DItemRevisionGUID=
 
-[GeneratedDocument35]
-DocumentPath=Project Outputs for Free Documents\Gerber\Gateway Board.RUL
-DItemRevisionGUID=
-
-[GeneratedDocument36]
-DocumentPath=Project Outputs for Gateway PCB\Gateway Board.RUL
-DItemRevisionGUID=
-
-[GeneratedDocument37]
+[GeneratedDocument15]
 DocumentPath=Project Outputs for Gateway PCB\Gerber\Gateway Board.RUL
 DItemRevisionGUID=
 
-[GeneratedDocument38]
+[GeneratedDocument16]
 DocumentPath=Project Outputs for Gateway PCB\NC Drill\Gateway Board.TXT
 DItemRevisionGUID=
 
