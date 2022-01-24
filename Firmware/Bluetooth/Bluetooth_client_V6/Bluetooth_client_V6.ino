@@ -32,33 +32,33 @@
 
 /* UUID's of the service, characteristic that we want to read and/or write */
 // BLE Services
-static char serviceUUID[] = CONNECT_UUID;
+static const char serviceUUID[] = CONNECT_UUID;
 
 // BLE Client
 static BLEClient *pClient;
 
 // Connection Characteristic
-static char sensorCharacteristicUUID[] = SENSOR_CHAR_UUID;
-static char batteryCharacteristicUUID[] = BATTERY_CHAR_UUID;
+static const char sensorCharacteristicUUID[] = SENSOR_CHAR_UUID;
+static const char batteryCharacteristicUUID[] = BATTERY_CHAR_UUID;
 
 //Flags stating if should begin connecting and if the connection is up
-static boolean doConnect = false;
-static boolean connected = false;
-static boolean isConnectionComplete = false;
-static boolean moreThanOneSensor = false;
-static uint8_t connectionCounter;
-static uint8_t iterationCounter;
-static uint8_t deviceIndex;
+boolean doConnect = false;
+boolean connected = false;
+boolean isConnectionComplete = false;
+boolean moreThanOneSensor = false;
+uint8_t connectionCounter = 0;
+uint8_t iterationCounter = 0;
+uint8_t deviceIndex = 0;
 static uint8_t brockenDevicesCounter = 0;
 
 //Advertised device of the peripheral device. Address will be found during scanning...
-static BLEAdvertisedDevice *myDevice;
+BLEAdvertisedDevice *myDevice = null;
 static std::string myDevices[TOTAL_POSSIBLE_LOCATIONS];
 static std::string brockenDevices[TOTAL_POSSIBLE_LOCATIONS];
 
 //Characteristic that we want to read
-static BLERemoteCharacteristic *pRemoteSensorCharacteristic;
-static BLERemoteCharacteristic *pRemoteBatteryCharacteristic;
+BLERemoteCharacteristic *pRemoteSensorCharacteristic;
+BLERemoteCharacteristic *pRemoteBatteryCharacteristic;
 
 //Variable to store characteristics' value
 float sensorValue;
