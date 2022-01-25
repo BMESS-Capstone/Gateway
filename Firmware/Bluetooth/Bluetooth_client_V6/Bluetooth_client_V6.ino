@@ -182,6 +182,7 @@ boolean connectToServer(std::string device) {
 void setup()
 {
   Serial.begin(115200);
+  pinMode(ONBOARD_LED, OUTPUT);
 
   BLEDevice::init("pIRfusiX Gateway");
 
@@ -190,8 +191,6 @@ void setup()
   pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
   pBLEScan->setActiveScan(true);
   pBLEScan->start(0, false);
-
-  pinMode(ONBOARD_LED, OUTPUT);
 }
 
 void loop() {
