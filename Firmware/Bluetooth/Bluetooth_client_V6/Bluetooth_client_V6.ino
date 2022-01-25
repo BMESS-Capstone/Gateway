@@ -31,15 +31,15 @@
 //********************************************************************
 
 /* UUID's of the service, characteristic that we want to read and/or write */
-// BLE Service
-const char serviceUUID[] = CONNECT_UUID;
+// BLE Services
+static const char serviceUUID[] = CONNECT_UUID;
 
 // BLE Client
-BLEClient *pClient;
+static BLEClient *pClient;
 
 // Connection Characteristic
-const char sensorCharacteristicUUID[] = SENSOR_CHAR_UUID;
-const char batteryCharacteristicUUID[] = BATTERY_CHAR_UUID;
+static const char sensorCharacteristicUUID[] = SENSOR_CHAR_UUID;
+static const char batteryCharacteristicUUID[] = BATTERY_CHAR_UUID;
 
 //Flags stating if should begin connecting and if the connection is up
 boolean doConnect = false;
@@ -49,12 +49,12 @@ boolean moreThanOneSensor = false;
 uint8_t connectionCounter = 0;
 uint8_t iterationCounter = 0;
 uint8_t deviceIndex = 0;
-uint8_t brockenDevicesCounter = 0;
+static uint8_t brockenDevicesCounter = 0;
 
 //Advertised device of the peripheral device. Address will be found during scanning...
-BLEAdvertisedDevice *myDevice;
-std::string myDevices[TOTAL_POSSIBLE_LOCATIONS];
-std::string brockenDevices[TOTAL_POSSIBLE_LOCATIONS];
+BLEAdvertisedDevice *myDevice = null;
+static std::string myDevices[TOTAL_POSSIBLE_LOCATIONS];
+static std::string brockenDevices[TOTAL_POSSIBLE_LOCATIONS];
 
 //Characteristic that we want to read
 BLERemoteCharacteristic *pRemoteSensorCharacteristic;
@@ -64,7 +64,7 @@ BLERemoteCharacteristic *pRemoteBatteryCharacteristic;
 float sensorValue;
 int batteryValue;
 
-void notifyCallback(BLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify) {
+static void notifyCallback(BLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify) {
   if (isConnectionComplete) {
     if (pBLERemoteCharacteristic->getUUID().toString() == sensorCharacteristicUUID) {
       sensorValue = *(float *)pData;
@@ -185,18 +185,13 @@ void setup()
 
   BLEDevice::init("pIRfusiX Gateway");
 
-  for (int i = 0; i < TOTAL_POSSIBLE_LOCATIONS; i++) {
-    myDevices[i] = "";
-    brockenDevices[i] = "";
-  }
-
-  pinMode(ONBOARD_LED, OUTPUT);
-
   // Retrieve a Scanner and set the callback
   BLEScan *pBLEScan = BLEDevice::getScan();
   pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
   pBLEScan->setActiveScan(true);
   pBLEScan->start(0, false);
+
+  pinMode(ONBOARD_LED, OUTPUT);
 }
 
 void loop() {
