@@ -49,10 +49,10 @@ boolean moreThanOneSensor = false;
 uint8_t connectionCounter = 0;
 uint8_t iterationCounter = 0;
 uint8_t deviceIndex = 0;
-static uint8_t brockenDevicesCounter = 0;
+uint8_t brockenDevicesCounter = 0;
 
 //Advertised device of the peripheral device. Address will be found during scanning...
-BLEAdvertisedDevice *myDevice = null;
+static BLEAdvertisedDevice *myDevice;
 static std::string myDevices[TOTAL_POSSIBLE_LOCATIONS];
 static std::string brockenDevices[TOTAL_POSSIBLE_LOCATIONS];
 
@@ -159,8 +159,8 @@ boolean connectToServer(std::string device) {
   }
 
   if (!isConnectionComplete) {
-    if (myDevices[int(sensorValue)] == "")
-      myDevices[int(sensorValue)] = myDevice->getAddress().toString();
+    if (myDevices[batteryValue] == "")
+      myDevices[batteryValue] = myDevice->getAddress().toString();
     else {
       Serial.println("2 sensors have the same location value");
       while (1) {
