@@ -129,13 +129,24 @@ void setup() {
   display.clearDisplay();
 
   bool connections [] = {true, false, false};
+  bool sensors [] = {true, true};
   int counter = 0;
   
   for(int i=110;i>0;i--){
-    oxygen_level(i, counter);
-    communication_display(connections,2);
+    oxygen_level(i, i, sensors, counter);
+    communication_display(connections);
     check_battery(i);
     counter++;
+    if (i <= 80 && i > 50){
+      connections[0] = false;
+      connections[1] = true;
+      sensors[0] = false;
+    }
+    else if (i <= 50){
+      connections[1] = false;
+      connections[2] = true;
+      sensors[1] = false;
+    }
     display.display();
     delay(400);
     display.clearDisplay();
@@ -150,9 +161,8 @@ void check_battery(int life){
     display.drawBitmap(110,0,battery, 18, 16, 1);
 }
 
-void communication_display(bool out [], int in){
+void communication_display(bool out []){
   int out_loc [] = {108,20};
-  int in_loc [] = {107, 44};
   
   if (out[0] == true)       // connected to wifi
     display.drawBitmap(out_loc[0],out_loc[1], wifi, 20, 16, 1);
@@ -160,35 +170,64 @@ void communication_display(bool out [], int in){
     display.drawBitmap(out_loc[0],out_loc[1], satellite, 16, 20, 1);
   else if (out[2] == true)  // connected to cellular
     display.drawBitmap(out_loc[0],out_loc[1], cellular, 16, 16, 1);
-
-  // displays each connected bluetooth
-  for (int i=0;i<in;i++){
-    display.drawBitmap(in_loc[0] - i*20, in_loc[1], bluetooth, 13, 20, 1);
-    display.setTextSize(1);
-    display.setTextColor(WHITE);
-    display.setCursor(in_loc[0] - i*20 + 14,in_loc[1] + 12); 
-    display.println(i+1);
-  }
 }
 
-void oxygen_level(int value, int counter) {
-  display.setTextSize(3);
+void oxygen_level(int c_value, int h_value, bool sensors [], int counter){
   display.setTextColor(WHITE);
-  display.setCursor(0,20);
-  display.println(value); 
+  int bl_loc [] = {107, 44};
 
+  // if bluetooth 1 is connection print info
+  if (sensors[0]){
+    display.drawBitmap(115, 44, bluetooth, 13, 20, 1);
+    display.setCursor(99, 56);
+    display.setTextSize(1); 
+    display.println("c");
+    display.setCursor(0,50);
+    display.println("calf");
+    display.setTextSize(3.5);
+    display.setCursor(0,20);
+    display.println(c_value);
+  }
+  else{
+    display.setTextSize(1); 
+    display.setCursor(0,50);
+    display.println("calf");
+    c_value = 100;
+  }
+
+  // if bluetooth 2 is connection print info
+  if (sensors[1]){
+    display.drawBitmap(115, 44, bluetooth, 13, 20, 1);
+    display.setCursor(107, 56);
+    display.setTextSize(1); 
+    display.println("h");
+    display.setCursor(60,50);
+    display.println("hand");
+    display.setTextSize(3.5);
+    display.setCursor(60,20);
+    display.println(h_value);
+  }
+  else{
+    display.setTextSize(1); 
+    display.setCursor(50,50);
+    display.println("hand");
+    h_value = 100;
+  }
+    
   display.setTextSize(2);
   display.setCursor(0,0);
 
   // runs through possible states
-  if(value <= 100 && value > 85){
+  if (!sensors[0] && !sensors[1])
+    display.println("Connect");
+  else if((c_value <= 100 && c_value > 85) && (h_value <= 100 && h_value > 85)){
     display.println("Stable");
   }
-  else if(value <= 85 && value > 70){
+  else if((c_value <= 85 && c_value > 70) || (h_value <= 85 && h_value > 70)){
     if (counter%4 == 0 || (counter - 1)%4 == 0)
       display.println("Caution");
   }
-  else if(value <= 70 && value >= 0){
+  else if((c_value <= 70 && c_value >= 0) || (h_value <= 70 && h_value >= 0)){
     if (counter%2 == 0)
       display.println("Warning");
   }
