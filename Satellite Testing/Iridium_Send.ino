@@ -45,7 +45,7 @@ void setup()
 
   // Start the I2C wire port connected to the satellite modem
   Wire.begin();
-  Wire.setClock(400000); //Set I2C clock speed to 400kHz
+  //Wire.setClock(400000); //Set I2C clock speed to 400kHz
 
   // Check that the Qwiic Iridium is attached
   if (!modem.isConnected())
@@ -53,120 +53,97 @@ void setup()
     Serial.println(F("Qwiic Iridium is not connected! Please check wiring. Freezing."));
     while(1);
   }
+  
+  for(int i=0;i<10;i++){
+    // Enable the supercapacitor charger
+    Serial.println(F("Enabling the supercapacitor charger..."));
+    modem.enableSuperCapCharger(true);
 
-  // Enable the supercapacitor charger
-  Serial.println(F("Enabling the supercapacitor charger..."));
-  modem.enableSuperCapCharger(true);
+    // Wait for the supercapacitor charger PGOOD signal to go high
+    while (!modem.checkSuperCapCharger())
+    {
+      Serial.println(F("Waiting for supercapacitors to charge..."));
+      delay(1000);
+    }
+    Serial.println(F("Supercapacitors charged!"));
 
-  // Wait for the supercapacitor charger PGOOD signal to go high
-  while (!modem.checkSuperCapCharger())
-  {
-    Serial.println(F("Waiting for supercapacitors to charge..."));
-    delay(1000);
+    // Enable power for the 9603N
+    Serial.println(F("Enabling 9603N power..."));
+    modem.enable9603Npower(true);
+
+    // Begin satellite modem operation
+    Serial.println(F("Starting modem..."));
+    modem.setPowerProfile(IridiumSBD::DEFAULT_POWER_PROFILE); // Assume 'USB' power (slow recharge)
+    err = modem.begin();
+    if (err != ISBD_SUCCESS)
+    {
+      Serial.print(F("Begin failed: error "));
+      Serial.println(err);
+      if (err == ISBD_NO_MODEM_DETECTED)
+        Serial.println(F("No modem detected: check wiring."));
+      return;
+    }
+    
+    // Example: Test the signal quality.
+    // This returns a number between 0 and 5.
+    // 2 or better is preferred.
+    err = modem.getSignalQuality(signalQuality);
+    if (err != ISBD_SUCCESS)
+    {
+      Serial.print(F("SignalQuality failed: error "));
+      Serial.println(err);
+      return;
+    }
+
+    Serial.print(F("On a scale of 0 to 5, signal quality is currently "));
+    Serial.print(signalQuality);
+    Serial.println(F("."));
+
+    // Send the message
+    String test_message = "testing message " + String(i);
+    Serial.println(F("Trying to send the message.  This might take several minutes."));
+    err = modem.sendSBDText(test_message.c_str());
+    if (err != ISBD_SUCCESS)
+    {
+      Serial.print(F("sendSBDText failed: error "));
+      Serial.println(err);
+      if (err == ISBD_SENDRECEIVE_TIMEOUT)
+        Serial.println(F("Try again with a better view of the sky."));
+    }
+
+    else
+    {
+      Serial.println(F("Hey, it worked!"));
+    }
+
+    // Clear the Mobile Originated message buffer
+    Serial.println(F("Clearing the MO buffer."));
+    err = modem.clearBuffers(ISBD_CLEAR_MO); // Clear MO buffer
+    if (err != ISBD_SUCCESS)
+    {
+      Serial.print(F("clearBuffers failed: error "));
+      Serial.println(err);
+    }
+
+    // Power down the modem
+    Serial.println(F("Putting the 9603N to sleep."));
+    err = modem.sleep();
+    if (err != ISBD_SUCCESS)
+    {
+      Serial.print(F("sleep failed: error "));
+      Serial.println(err);
+    }
+
+    // Disable 9603N power
+    Serial.println(F("Disabling 9603N power..."));
+    modem.enable9603Npower(false);
+
+    // Disable the supercapacitor charger
+    Serial.println(F("Disabling the supercapacitor charger..."));
+    modem.enableSuperCapCharger(false);
+
+    Serial.println(F("Done!"));
   }
-  Serial.println(F("Supercapacitors charged!"));
-
-  // Enable power for the 9603N
-  Serial.println(F("Enabling 9603N power..."));
-  modem.enable9603Npower(true);
-
-  // Begin satellite modem operation
-  Serial.println(F("Starting modem..."));
-  modem.setPowerProfile(IridiumSBD::USB_POWER_PROFILE); // Assume 'USB' power (slow recharge)
-  err = modem.begin();
-  if (err != ISBD_SUCCESS)
-  {
-    Serial.print(F("Begin failed: error "));
-    Serial.println(err);
-    if (err == ISBD_NO_MODEM_DETECTED)
-      Serial.println(F("No modem detected: check wiring."));
-    return;
-  }
-
-  // Example: Print the firmware revision
-  char version[12];
-  err = modem.getFirmwareVersion(version, sizeof(version));
-  if (err != ISBD_SUCCESS)
-  {
-     Serial.print(F("FirmwareVersion failed: error "));
-     Serial.println(err);
-     return;
-  }
-  Serial.print(F("Firmware Version is "));
-  Serial.print(version);
-  Serial.println(F("."));
-
-  // Example: Print the IMEI
-  char IMEI[16];
-  err = modem.getIMEI(IMEI, sizeof(IMEI));
-  if (err != ISBD_SUCCESS)
-  {
-     Serial.print(F("getIMEI failed: error "));
-     Serial.println(err);
-     return;
-  }
-  Serial.print(F("IMEI is "));
-  Serial.print(IMEI);
-  Serial.println(F("."));
-
-  // Example: Test the signal quality.
-  // This returns a number between 0 and 5.
-  // 2 or better is preferred.
-  err = modem.getSignalQuality(signalQuality);
-  if (err != ISBD_SUCCESS)
-  {
-    Serial.print(F("SignalQuality failed: error "));
-    Serial.println(err);
-    return;
-  }
-
-  Serial.print(F("On a scale of 0 to 5, signal quality is currently "));
-  Serial.print(signalQuality);
-  Serial.println(F("."));
-
-  // Send the message
-  Serial.println(F("Trying to send the message.  This might take several minutes."));
-  err = modem.sendSBDText("Hello, world!");
-  if (err != ISBD_SUCCESS)
-  {
-    Serial.print(F("sendSBDText failed: error "));
-    Serial.println(err);
-    if (err == ISBD_SENDRECEIVE_TIMEOUT)
-      Serial.println(F("Try again with a better view of the sky."));
-  }
-
-  else
-  {
-    Serial.println(F("Hey, it worked!"));
-  }
-
-  // Clear the Mobile Originated message buffer
-  Serial.println(F("Clearing the MO buffer."));
-  err = modem.clearBuffers(ISBD_CLEAR_MO); // Clear MO buffer
-  if (err != ISBD_SUCCESS)
-  {
-    Serial.print(F("clearBuffers failed: error "));
-    Serial.println(err);
-  }
-
-  // Power down the modem
-  Serial.println(F("Putting the 9603N to sleep."));
-  err = modem.sleep();
-  if (err != ISBD_SUCCESS)
-  {
-    Serial.print(F("sleep failed: error "));
-    Serial.println(err);
-  }
-
-  // Disable 9603N power
-  Serial.println(F("Disabling 9603N power..."));
-  modem.enable9603Npower(false);
-
-  // Disable the supercapacitor charger
-  Serial.println(F("Disabling the supercapacitor charger..."));
-  modem.enableSuperCapCharger(false);
-
-  Serial.println(F("Done!"));
 }
 
 void loop()
